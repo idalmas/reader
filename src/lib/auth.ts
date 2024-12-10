@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 
 export async function getAuthenticatedUserId() {
-  const headersList = headers()
+  const headersList = Object.fromEntries(headers().entries())
   const auth = getAuth({ headers: headersList })
   const { userId } = auth
   
