@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { AddFeedDialog } from '@/components/AddFeedDialog'
 import { type Feed, type FeedItem, type ItemStatus } from '@/types/database'
 
@@ -10,86 +10,118 @@ export default function Dashboard() {
   const [items, setItems] = useState<FeedItem[]>([])
   const [status, setStatus] = useState<ItemStatus>('unread')
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
-  // Fetch feeds
-  useEffect(() => {
-    fetchFeeds()
-  }, [])
-
-  // Fetch items when status changes
-  useEffect(() => {
-    fetchItems()
-  }, [status])
-
-  async function fetchFeeds() {
+  const fetchFeeds = useCallback(async () => {
     try {
       const res = await fetch('/api/feeds')
       if (!res.ok) throw new Error('Failed to fetch feeds')
       const data = await res.json()
       setFeeds(data)
-    } catch (error) {
+      setError(null)
+    } catch (err) {
       setError('Failed to load feeds')
+      console.error(err)
     }
-  }
+  }, [])
 
-  async function fetchItems() {
+  const fetchItems = useCallback(async () => {
     try {
       setLoading(true)
       const res = await fetch(`/api/items?status=${status}`)
       if (!res.ok) throw new Error('Failed to fetch items')
       const data = await res.json()
       setItems(data.items)
-    } catch (error) {
+      setError(null)
+    } catch (err) {
       setError('Failed to load items')
+      console.error(err)
     } finally {
       setLoading(false)
     }
-  }
+  }, [status])
+
+  // Fetch feeds
+  useEffect(() => {
+    fetchFeeds()
+  }, [fetchFeeds])
+
+  // Fetch items when status changes
+  useEffect(() => {
+    fetchItems()
+  }, [fetchItems, status])
 
   async function addFeed(url: string) {
-    const res = await fetch('/api/feeds', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url })
-    })
-    
-    if (!res.ok) {
-      throw new Error('Failed to add feed')
+    try {
+      const res = await fetch('/api/feeds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      })
+      
+      if (!res.ok) {
+        throw new Error('Failed to add feed')
+      }
+      
+      await fetchFeeds()
+      await fetchItems()
+      setError(null)
+    } catch (err) {
+      setError('Failed to add feed')
+      throw err
     }
-    
-    await fetchFeeds()
-    await fetchItems()
   }
 
   async function deleteFeed(id: string) {
     if (!confirm('Are you sure you want to delete this feed?')) return
     
-    const res = await fetch(`/api/feeds?id=${id}`, {
-      method: 'DELETE'
-    })
-    
-    if (res.ok) {
-      await fetchFeeds()
-      await fetchItems()
+    try {
+      const res = await fetch(`/api/feeds?id=${id}`, {
+        method: 'DELETE'
+      })
+      
+      if (res.ok) {
+        await fetchFeeds()
+        await fetchItems()
+        setError(null)
+      } else {
+        throw new Error('Failed to delete feed')
+      }
+    } catch (err) {
+      setError('Failed to delete feed')
+      console.error(err)
     }
   }
 
   async function updateItemStatus(id: string, newStatus: ItemStatus) {
-    const res = await fetch('/api/items', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, status: newStatus })
-    })
-    
-    if (res.ok) {
-      await fetchItems()
+    try {
+      const res = await fetch('/api/items', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: newStatus })
+      })
+      
+      if (res.ok) {
+        await fetchItems()
+        setError(null)
+      } else {
+        throw new Error('Failed to update item')
+      }
+    } catch (err) {
+      setError('Failed to update item status')
+      console.error(err)
     }
   }
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-md">
+            {error}
+          </div>
+        )}
+        
         {/* Feeds Section */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <div className="flex justify-between items-center mb-4">
@@ -123,7 +155,7 @@ export default function Dashboard() {
             </ul>
           )}
         </div>
-        
+
         {/* Items Section */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-6">
@@ -161,7 +193,7 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
-          
+
           {loading ? (
             <p className="text-center py-8 text-gray-500">Loading...</p>
           ) : items.length === 0 ? (

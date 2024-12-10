@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { NextRequest } from 'next/server'
 import { getAuth } from '@clerk/nextjs/server'
 import { supabase } from '@/lib/supabase'
-import { type ItemStatus, type ApiError } from '@/types/database'
+import { type ItemStatus, type ApiError, type FeedItemWithFeed, type FeedItemJoinResult } from '@/types/database'
 
 // GET /api/items - List feed items
 export async function GET(request: NextRequest) {
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     if (error) throw error
     
     return NextResponse.json({
-      items,
+      items: items as FeedItemWithFeed[],
       total: count,
       page,
       totalPages: Math.ceil((count || 0) / limit)
@@ -57,7 +57,7 @@ export async function PATCH(request: NextRequest) {
       .eq('id', id)
       .single()
     
-    if (checkError || !item || (item.feeds as any).user_id !== userId) {
+    if (checkError || !item || (item as FeedItemJoinResult).feeds.user_id !== userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     

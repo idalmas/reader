@@ -20,6 +20,16 @@ export interface FeedItem {
   created_at: string
 }
 
+export interface FeedItemWithFeed extends FeedItem {
+  feeds: Feed
+}
+
+export interface FeedItemJoinResult {
+  feeds: {
+    user_id: string
+  }
+}
+
 export interface Database {
   public: {
     Tables: {

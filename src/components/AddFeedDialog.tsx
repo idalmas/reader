@@ -9,18 +9,19 @@ export function AddFeedDialog({
 }) {
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError('')
+    setError(null)
     
     try {
       await onAdd(url)
       onClose()
-    } catch (error) {
+    } catch (err) {
       setError('Failed to add feed. Please check the URL and try again.')
+      console.error(err)
     } finally {
       setLoading(false)
     }
