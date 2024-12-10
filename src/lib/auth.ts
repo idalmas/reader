@@ -1,5 +1,4 @@
 import { getAuth } from '@clerk/nextjs/server'
-import type { RequestLike } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import type { IncomingMessage } from 'http'
@@ -36,8 +35,36 @@ export async function getAuthenticatedUserId(req: NextRequest) {
     readableHighWaterMark: 16384,
     readableLength: 0,
     readableObjectMode: false,
-    destroyed: false
-  } as unknown as RequestLike
+    destroyed: false,
+    // Stream methods
+    on: () => requestLike,
+    once: () => requestLike,
+    removeListener: () => requestLike,
+    off: () => requestLike,
+    addListener: () => requestLike,
+    removeAllListeners: () => requestLike,
+    setMaxListeners: () => requestLike,
+    getMaxListeners: () => 10,
+    listeners: () => [],
+    rawListeners: () => [],
+    emit: () => true,
+    listenerCount: () => 0,
+    prependListener: () => requestLike,
+    prependOnceListener: () => requestLike,
+    eventNames: () => [],
+    // Readable stream methods
+    read: () => null,
+    setEncoding: () => requestLike,
+    pause: () => requestLike,
+    resume: () => requestLike,
+    isPaused: () => false,
+    unpipe: () => requestLike,
+    unshift: () => {},
+    wrap: () => {},
+    push: () => false,
+    destroy: () => {},
+    pipe: () => requestLike
+  } as IncomingMessage & { cookies: { [key: string]: string }, url: string, method: string }
   
   try {
     const { userId } = getAuth(requestLike)
