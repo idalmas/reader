@@ -57,7 +57,8 @@ export async function PATCH(request: NextRequest) {
       .eq('id', id)
       .single()
     
-    if (checkError || !item || (item as FeedItemJoinResult).feeds.user_id !== userId) {
+    const itemData = item as FeedItemJoinResult
+    if (checkError || !itemData || !itemData.feeds[0] || itemData.feeds[0].user_id !== userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     

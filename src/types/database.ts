@@ -25,9 +25,9 @@ export interface FeedItemWithFeed extends FeedItem {
 }
 
 export interface FeedItemJoinResult {
-  feeds: {
+  feeds: Array<{
     user_id: string
-  }
+  }>
 }
 
 export interface Database {
