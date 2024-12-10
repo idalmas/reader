@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server'
 import { NextRequest } from 'next/server'
-import { getAuth } from '@clerk/nextjs/server'
+import { getAuthenticatedUserId, unauthorized } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { type ItemStatus, type ApiError, type FeedItemWithFeed, type FeedItemJoinResult } from '@/types/database'
 
 // GET /api/items - List feed items
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = getAuth(request)
-    if (!userId) throw new Error('Unauthorized')
+    const userId = await getAuthenticatedUserId(request)
     
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') as ItemStatus || 'unread'
@@ -45,9 +44,7 @@ export async function GET(request: NextRequest) {
 // PATCH /api/items - Update item status
 export async function PATCH(request: NextRequest) {
   try {
-    const { userId } = getAuth(request)
-    if (!userId) throw new Error('Unauthorized')
-    
+    const userId = await getAuthenticatedUserId(request)
     const { id, status } = await request.json()
     
     // Verify the item belongs to the user

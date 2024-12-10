@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { NextRequest } from 'next/server'
 import Parser from 'rss-parser'
-import { getAuth } from '@clerk/nextjs/server'
+import { getAuthenticatedUserId, unauthorized } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { ApiError } from '@/types/database'
 
@@ -15,8 +15,7 @@ const parser = new Parser({
 // GET /api/feeds - List user's feeds
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = getAuth(request)
-    if (!userId) throw new Error('Unauthorized')
+    const userId = await getAuthenticatedUserId(request)
     
     const { data: feeds, error } = await supabase
       .from('feeds')
@@ -40,9 +39,7 @@ export async function GET(request: NextRequest) {
 // POST /api/feeds - Add a new feed
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = getAuth(request)
-    if (!userId) throw new Error('Unauthorized')
-    
+    const userId = await getAuthenticatedUserId(request)
     const { url } = await request.json()
     
     // Fetch the feed content
@@ -131,9 +128,7 @@ export async function POST(request: NextRequest) {
 // DELETE /api/feeds - Delete a feed
 export async function DELETE(request: NextRequest) {
   try {
-    const { userId } = getAuth(request)
-    if (!userId) throw new Error('Unauthorized')
-    
+    const userId = await getAuthenticatedUserId(request)
     const { searchParams } = new URL(request.url)
     const feedId = searchParams.get('id')
     
