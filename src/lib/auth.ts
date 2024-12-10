@@ -1,14 +1,25 @@
 import { getAuth } from '@clerk/nextjs/server'
+import type { RequestLike } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import type { IncomingMessage } from 'http'
 
 export async function getAuthenticatedUserId(req: NextRequest) {
+  // Convert cookies to plain object
+  const cookieStr = req.headers.get('cookie') || ''
+  const cookies = Object.fromEntries(
+    cookieStr.split(';')
+      .map(cookie => cookie.trim().split('='))
+      .filter(parts => parts.length === 2)
+  )
+
+  // Create a request-like object that satisfies both IncomingMessage and GsspRequest
   const requestLike = {
     headers: Object.fromEntries(req.headers.entries()),
     method: req.method,
     url: req.url,
-    // Add required IncomingMessage properties
+    cookies,
+    // Required IncomingMessage properties
     aborted: false,
     httpVersion: '1.1',
     httpVersionMajor: 1,
@@ -26,15 +37,18 @@ export async function getAuthenticatedUserId(req: NextRequest) {
     readableLength: 0,
     readableObjectMode: false,
     destroyed: false
-  } as unknown as IncomingMessage
+  } as unknown as RequestLike
   
-  const { userId } = getAuth(requestLike)
-  
-  if (!userId) {
+  try {
+    const { userId } = getAuth(requestLike)
+    if (!userId) {
+      throw new Error('Unauthorized')
+    }
+    return userId
+  } catch (error) {
+    console.error('Auth error:', error)
     throw new Error('Unauthorized')
   }
-  
-  return userId
 }
 
 export function unauthorized() {
