@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { getAuth } from '@clerk/nextjs/server'
 import { supabase } from '@/lib/supabase'
-import { type ItemStatus } from '@/types/database'
+import { type ItemStatus, type ApiError } from '@/types/database'
 
 // GET /api/items - List feed items
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const { userId } = getAuth(request)
     if (!userId) throw new Error('Unauthorized')
@@ -31,9 +32,10 @@ export async function GET(request: Request) {
       page,
       totalPages: Math.ceil((count || 0) / limit)
     })
-  } catch (error: any) {
-    console.error('Items fetch error:', error)
-    if (error.message === 'Unauthorized') {
+  } catch (error: unknown) {
+    const apiError = error as ApiError
+    console.error('Items fetch error:', apiError)
+    if (apiError.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     return NextResponse.json({ error: 'Failed to fetch items' }, { status: 500 })
@@ -41,7 +43,7 @@ export async function GET(request: Request) {
 }
 
 // PATCH /api/items - Update item status
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
   try {
     const { userId } = getAuth(request)
     if (!userId) throw new Error('Unauthorized')
@@ -68,9 +70,10 @@ export async function PATCH(request: Request) {
     if (error) throw error
     
     return NextResponse.json({ success: true })
-  } catch (error: any) {
-    console.error('Item update error:', error)
-    if (error.message === 'Unauthorized') {
+  } catch (error: unknown) {
+    const apiError = error as ApiError
+    console.error('Item update error:', apiError)
+    if (apiError.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     return NextResponse.json({ error: 'Failed to update item' }, { status: 500 })

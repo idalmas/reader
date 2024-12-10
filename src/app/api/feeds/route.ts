@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import Parser from 'rss-parser'
 import { getAuth } from '@clerk/nextjs/server'
 import { supabase } from '@/lib/supabase'
+import { ApiError } from '@/types/database'
 
 const parser = new Parser({
   headers: {
@@ -11,7 +13,7 @@ const parser = new Parser({
 })
 
 // GET /api/feeds - List user's feeds
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const { userId } = getAuth(request)
     if (!userId) throw new Error('Unauthorized')
@@ -25,9 +27,10 @@ export async function GET(request: Request) {
     if (error) throw error
     
     return NextResponse.json(feeds)
-  } catch (error: any) {
-    console.error('Feed fetch error:', error)
-    if (error.message === 'Unauthorized') {
+  } catch (error: unknown) {
+    const apiError = error as ApiError
+    console.error('Feed fetch error:', apiError)
+    if (apiError.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     return NextResponse.json({ error: 'Failed to fetch feeds' }, { status: 500 })
@@ -35,7 +38,7 @@ export async function GET(request: Request) {
 }
 
 // POST /api/feeds - Add a new feed
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const { userId } = getAuth(request)
     if (!userId) throw new Error('Unauthorized')
@@ -61,8 +64,9 @@ export async function POST(request: Request) {
       
       const feedText = await response.text()
       feed = await parser.parseString(feedText)
-    } catch (error: any) {
-      console.error('Feed parsing error:', error)
+    } catch (error: unknown) {
+      const apiError = error as ApiError
+      console.error('Feed parsing error:', apiError)
       return NextResponse.json({ 
         error: 'Failed to parse feed. Please check the URL and try again.' 
       }, { status: 400 })
@@ -112,9 +116,10 @@ export async function POST(request: Request) {
     }
     
     return NextResponse.json(newFeed)
-  } catch (error: any) {
-    console.error('Feed addition error:', error)
-    if (error.message === 'Unauthorized') {
+  } catch (error: unknown) {
+    const apiError = error as ApiError
+    console.error('Feed addition error:', apiError)
+    if (apiError.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     return NextResponse.json({ 
@@ -124,7 +129,7 @@ export async function POST(request: Request) {
 }
 
 // DELETE /api/feeds - Delete a feed
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
   try {
     const { userId } = getAuth(request)
     if (!userId) throw new Error('Unauthorized')
@@ -144,9 +149,10 @@ export async function DELETE(request: Request) {
     if (error) throw error
     
     return NextResponse.json({ success: true })
-  } catch (error: any) {
-    console.error('Feed deletion error:', error)
-    if (error.message === 'Unauthorized') {
+  } catch (error: unknown) {
+    const apiError = error as ApiError
+    console.error('Feed deletion error:', apiError)
+    if (apiError.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     return NextResponse.json({ error: 'Failed to delete feed' }, { status: 500 })
