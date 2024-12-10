@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { NextRequest } from 'next/server'
-import { getAuthenticatedUserId, unauthorized } from '@/lib/auth'
+import { getAuthenticatedUserId } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { type ItemStatus, type ApiError, type FeedItemWithFeed, type FeedItemJoinResult } from '@/types/database'
 

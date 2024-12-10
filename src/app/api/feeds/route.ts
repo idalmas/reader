@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { NextRequest } from 'next/server'
 import Parser from 'rss-parser'
-import { getAuthenticatedUserId, unauthorized } from '@/lib/auth'
+import { getAuthenticatedUserId } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { ApiError } from '@/types/database'
 
