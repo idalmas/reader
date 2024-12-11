@@ -23,7 +23,7 @@ export default function Home() {
           {/* Floating Header Bar */}
           <div className="absolute top-8 left-0 right-0 z-10 px-4">
             <div className="max-w-2xl mx-auto">
-              <div className="bg-white rounded-full h-12 flex items-center justify-between px-6">
+              <div className="bg-white rounded-lg h-12 flex items-center justify-between px-6">
                 <div className="text-lg font-medium tracking-tight">Osgiliath</div>
                 <SignedOut>
                   <SignInButton mode="modal">
@@ -58,14 +58,14 @@ export default function Home() {
                 <SignedIn>
                   <Link
                     href="/dashboard"
-                    className="rounded-full bg-black px-8 py-3 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black transition-all duration-200"
+                    className="rounded-lg bg-black px-8 py-3 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black transition-all duration-200"
                   >
                     Go to Dashboard
                   </Link>
                 </SignedIn>
                 <SignedOut>
                   <SignInButton mode="modal">
-                    <button className="rounded-full bg-black px-8 py-3 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black transition-all duration-200">
+                    <button className="rounded-lg bg-black px-8 py-3 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black transition-all duration-200">
                       Get Started
                     </button>
                   </SignInButton>
