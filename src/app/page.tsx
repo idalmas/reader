@@ -41,29 +41,48 @@ export default function Home() {
             </div>
           </div>
         </div>
-        
-        <div className="mx-auto max-w-[90%] lg:max-w-[80%] py-12">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl text-gray-900">
-              A simple RSS feed
-            </h1>
-            
-            <div className="mt-10 flex items-center justify-center gap-x-6">
-              <SignedIn>
-                <Link
-                  href="/dashboard"
-                  className="rounded-full bg-black px-8 py-3 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black transition-all duration-200"
-                >
-                  Go to Dashboard
-                </Link>
-              </SignedIn>
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="rounded-full bg-black px-8 py-3 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black transition-all duration-200">
-                    Get Started
-                  </button>
-                </SignInButton>
-              </SignedOut>
+
+        {/* Overlapping White Box */}
+        <div className="relative -mt-48 sm:-mt-72">
+          <div className="bg-white shadow-xl mx-auto w-[800px] h-[400px] rounded-t-2xl relative">
+            {/* Text on white box */}
+            <div className="absolute inset-x-0 top-16 flex items-center justify-center">
+              <h1 className="text-4xl sm:text-6xl font-medium tracking-tight text-black">
+                A simple RSS reader
+              </h1>
+            </div>
+
+            {/* Buttons */}
+            <div className="absolute inset-x-0 top-48 flex items-center justify-center">
+              <div className="flex items-center justify-center gap-x-6">
+                <SignedIn>
+                  <Link
+                    href="/dashboard"
+                    className="rounded-full bg-black px-8 py-3 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black transition-all duration-200"
+                  >
+                    Go to Dashboard
+                  </Link>
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <button className="rounded-full bg-black px-8 py-3 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black transition-all duration-200">
+                      Get Started
+                    </button>
+                  </SignInButton>
+                </SignedOut>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Space before footer */}
+        <div className="h-24"></div>
+
+        {/* Minimal Footer */}
+        <div className="border-t border-gray-200">
+          <div className="mx-auto max-w-7xl px-6 py-12">
+            <div className="text-center text-sm text-gray-500">
+              © 2024
             </div>
           </div>
         </div>
