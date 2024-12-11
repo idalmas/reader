@@ -3,6 +3,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { AddFeedDialog } from '@/components/AddFeedDialog'
 import { type Feed, type FeedItem, type ItemStatus } from '@/types/database'
+import { Inter } from 'next/font/google'
+import Link from 'next/link'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export default function Dashboard() {
   const [showAddDialog, setShowAddDialog] = useState(false)
@@ -114,134 +118,144 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div className={`min-h-screen bg-gray-50 pt-20 selection:bg-black selection:text-white ${inter.className}`}>
+      <main className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-8">
         {error && (
           <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-md">
             {error}
           </div>
         )}
         
-        {/* Feeds Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-medium">Your RSS Feeds</h2>
-            <button
-              onClick={() => setShowAddDialog(true)}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
-            >
-              Add New Feed
-            </button>
+        <div className="flex gap-36 relative">
+          {/* Left Side - Feed Content */}
+          <div className="flex-grow max-w-3xl">
+            {loading ? (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <p className="text-center py-8 text-gray-500">Loading...</p>
+              </div>
+            ) : items.length === 0 ? (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <p className="text-center py-8 text-gray-500">No items found</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <ul className="divide-y divide-gray-200">
+                  {items.map((item) => (
+                    <li key={item.id} className="py-6">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="text-lg font-medium">
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-gray-600 transition-colors"
+                          >
+                            {item.title}
+                          </a>
+                        </h3>
+                      </div>
+                      {item.description && (
+                        <div
+                          className="text-gray-600 text-sm prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: item.description }}
+                        />
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-          
-          {feeds.length === 0 ? (
-            <p className="text-gray-500">No feeds added yet</p>
-          ) : (
-            <ul className="divide-y divide-gray-200">
-              {feeds.map((feed) => (
-                <li key={feed.id} className="py-4 flex justify-between items-center">
-                  <div>
-                    <h3 className="text-sm font-medium">{feed.title}</h3>
-                    <p className="text-sm text-gray-500">{feed.url}</p>
-                  </div>
-                  <button
-                    onClick={() => deleteFeed(feed.id)}
-                    className="text-red-600 hover:text-red-800 text-sm"
-                  >
-                    Delete
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
 
-        {/* Items Section */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-medium">Feed Items</h2>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setStatus('unread')}
-                className={`px-3 py-1 text-sm rounded-md ${
-                  status === 'unread'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700'
-                }`}
-              >
-                Unread
-              </button>
-              <button
-                onClick={() => setStatus('read')}
-                className={`px-3 py-1 text-sm rounded-md ${
-                  status === 'read'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700'
-                }`}
-              >
-                Read
-              </button>
-              <button
-                onClick={() => setStatus('archived')}
-                className={`px-3 py-1 text-sm rounded-md ${
-                  status === 'archived'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700'
-                }`}
-              >
-                Archived
-              </button>
+          {/* Right Side - Controls */}
+          <div className="w-64 space-y-12 fixed right-8">
+            {/* Navigation */}
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-sm font-medium uppercase tracking-wide text-gray-500">Osgiliath</h2>
+              </div>
+              <div className="flex flex-col gap-3">
+                <Link 
+                  href="/dashboard"
+                  className="px-3 py-1.5 text-sm text-black font-medium"
+                >
+                  Dashboard
+                </Link>
+                <Link 
+                  href="/feeds"
+                  className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                >
+                  Your Feeds
+                </Link>
+              </div>
             </div>
-          </div>
 
-          {loading ? (
-            <p className="text-center py-8 text-gray-500">Loading...</p>
-          ) : items.length === 0 ? (
-            <p className="text-center py-8 text-gray-500">No items found</p>
-          ) : (
-            <ul className="divide-y divide-gray-200">
-              {items.map((item) => (
-                <li key={item.id} className="py-6">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-medium">
-                      <a
-                        href={item.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:text-blue-600"
-                      >
-                        {item.title}
-                      </a>
-                    </h3>
-                    <div className="flex gap-2">
-                      {status === 'unread' && (
-                        <button
-                          onClick={() => updateItemStatus(item.id, 'read')}
-                          className="text-sm text-blue-600 hover:text-blue-800"
-                        >
-                          Mark as Read
-                        </button>
-                      )}
-                      {status !== 'archived' && (
-                        <button
-                          onClick={() => updateItemStatus(item.id, 'archived')}
-                          className="text-sm text-gray-600 hover:text-gray-800"
-                        >
-                          Archive
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  {item.description && (
-                    <div
-                      className="text-gray-600 text-sm prose prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{ __html: item.description }}
-                    />
+            {/* Filter Controls */}
+            <div>
+              <h2 className="text-sm font-medium uppercase tracking-wide text-gray-500 mb-6">Filter</h2>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => setStatus('unread')}
+                  className={`px-3 py-1.5 text-sm text-left ${
+                    status === 'unread'
+                      ? 'text-black font-medium'
+                      : 'text-gray-500 hover:text-gray-900'
+                  } transition-colors`}
+                >
+                  Unread
+                </button>
+                <button
+                  onClick={() => setStatus('read')}
+                  className={`px-3 py-1.5 text-sm text-left ${
+                    status === 'read'
+                      ? 'text-black font-medium'
+                      : 'text-gray-500 hover:text-gray-900'
+                  } transition-colors`}
+                >
+                  Read
+                </button>
+                <button
+                  onClick={() => setStatus('archived')}
+                  className={`px-3 py-1.5 text-sm text-left ${
+                    status === 'archived'
+                      ? 'text-black font-medium'
+                      : 'text-gray-500 hover:text-gray-900'
+                  } transition-colors`}
+                >
+                  Archived
+                </button>
+              </div>
+            </div>
+
+            {/* Item Actions */}
+            {items.length > 0 && (
+              <div>
+                <h2 className="text-sm font-medium uppercase tracking-wide text-gray-500 mb-6">Actions</h2>
+                <div className="space-y-3">
+                  {status === 'unread' && (
+                    <button
+                      onClick={() => {
+                        items.forEach(item => updateItemStatus(item.id, 'read'))
+                      }}
+                      className="w-full text-left text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                    >
+                      Mark All as Read
+                    </button>
                   )}
-                </li>
-              ))}
-            </ul>
-          )}
+                  {status !== 'archived' && (
+                    <button
+                      onClick={() => {
+                        items.forEach(item => updateItemStatus(item.id, 'archived'))
+                      }}
+                      className="w-full text-left text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                    >
+                      Archive All
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </main>
       
