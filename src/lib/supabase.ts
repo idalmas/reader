@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -10,4 +10,4 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseServiceRoleK
     autoRefreshToken: false,
     persistSession: false
   }
-}); 
+}) satisfies SupabaseClient<Database>; 
