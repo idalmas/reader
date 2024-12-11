@@ -1,35 +1,42 @@
 import { createClient } from '@supabase/supabase-js';
 import { getAuth } from '@clerk/nextjs/server';
+import { headers } from 'next/headers';
+import type { Database } from '@/types/database';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-// Create a Supabase client with the service role key
-export const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
+// Create a single supabase client for interacting with your database
+export const supabase = createClient<Database>(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      persistSession: false,
+    },
   }
-});
+);
 
 // Create an authenticated client for API routes
 export async function createAuthenticatedClient() {
-  const { userId } = getAuth()
+  const headersList = headers();
+  const authRequest = {
+    headers: Object.fromEntries(headersList.entries()),
+    method: 'GET',
+    url: '/',
+    cookies: {}
+  };
+
+  const { userId } = getAuth(authRequest);
   
   if (!userId) {
     throw new Error('Unauthorized');
   }
 
-  // Create a new client with the service role key and user context
-  return createClient(supabaseUrl, supabaseServiceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    },
-    global: {
-      headers: {
-        'x-user-id': userId
-      }
+  return createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        persistSession: false,
+      },
     }
-  });
+  );
 } 
