@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AddFeedDialog } from '@/components/AddFeedDialog'
-import { type Feed, type FeedItem, type ItemStatus } from '@/types/database'
+import { type FeedItem, type ItemStatus } from '@/types/database'
 import { Inter } from 'next/font/google'
 import Link from 'next/link'
 
@@ -10,24 +10,10 @@ const inter = Inter({ subsets: ['latin'] })
 
 export default function Dashboard() {
   const [showAddDialog, setShowAddDialog] = useState(false)
-  const [feeds, setFeeds] = useState<Feed[]>([])
   const [items, setItems] = useState<FeedItem[]>([])
   const [status, setStatus] = useState<ItemStatus>('unread')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  const fetchFeeds = useCallback(async () => {
-    try {
-      const res = await fetch('/api/feeds')
-      if (!res.ok) throw new Error('Failed to fetch feeds')
-      const data = await res.json()
-      setFeeds(data)
-      setError(null)
-    } catch (err) {
-      setError('Failed to load feeds')
-      console.error(err)
-    }
-  }, [])
 
   const fetchItems = useCallback(async () => {
     try {
@@ -45,15 +31,10 @@ export default function Dashboard() {
     }
   }, [status])
 
-  // Fetch feeds
-  useEffect(() => {
-    fetchFeeds()
-  }, [fetchFeeds])
-
   // Fetch items when status changes
   useEffect(() => {
     fetchItems()
-  }, [fetchItems, status])
+  }, [fetchItems])
 
   async function addFeed(url: string) {
     try {
@@ -67,33 +48,11 @@ export default function Dashboard() {
         throw new Error('Failed to add feed')
       }
       
-      await fetchFeeds()
       await fetchItems()
       setError(null)
     } catch (err) {
       setError('Failed to add feed')
       throw err
-    }
-  }
-
-  async function deleteFeed(id: string) {
-    if (!confirm('Are you sure you want to delete this feed?')) return
-    
-    try {
-      const res = await fetch(`/api/feeds?id=${id}`, {
-        method: 'DELETE'
-      })
-      
-      if (res.ok) {
-        await fetchFeeds()
-        await fetchItems()
-        setError(null)
-      } else {
-        throw new Error('Failed to delete feed')
-      }
-    } catch (err) {
-      setError('Failed to delete feed')
-      console.error(err)
     }
   }
 
