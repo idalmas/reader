@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export default function Home() {
   return (
-    <div className={`min-h-screen bg-white ${inter.className}`}>
+    <div className={`min-h-screen bg-white selection:bg-black selection:text-white ${inter.className}`}>
       {/* Hero Section */}
       <div className="relative isolate">
         {/* Full-width image container */}
