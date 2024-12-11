@@ -43,8 +43,8 @@ export default function Home() {
         </div>
 
         {/* Overlapping White Box */}
-        <div className="relative -mt-48 sm:-mt-72">
-          <div className="bg-white shadow-xl mx-auto w-[800px] h-[400px] rounded-t-2xl relative">
+        <div className="relative -mt-64 sm:-mt-[400px]">
+          <div className="bg-white shadow-xl mx-auto w-[700px] h-[650px] rounded-t-2xl relative">
             {/* Text on white box */}
             <div className="absolute inset-x-0 top-16 flex items-center justify-center">
               <h1 className="text-4xl sm:text-6xl font-medium tracking-tight text-black">
