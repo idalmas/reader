@@ -8,16 +8,17 @@ import Link from 'next/link'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export default function FeedsPage(): JSX.Element {
-  const [showAddDialog, setShowAddDialog] = useState<boolean>(false)
+export default function FeedsPage() {
+  const [showAddDialog, setShowAddDialog] = useState(false)
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const [feeds, setFeeds] = useState<Feed[]>([])
   const [error, setError] = useState<string | null>(null)
 
-  const fetchFeeds: () => Promise<void> = useCallback(async () => {
+  const fetchFeeds = useCallback(async () => {
     try {
       const res = await fetch('/api/feeds')
       if (!res.ok) throw new Error('Failed to fetch feeds')
-      const data: Feed[] = await res.json()
+      const data = await res.json()
       setFeeds(data)
       setError(null)
     } catch (err) {
@@ -27,10 +28,10 @@ export default function FeedsPage(): JSX.Element {
   }, [])
 
   useEffect(() => {
-    void fetchFeeds()
+    fetchFeeds()
   }, [fetchFeeds])
 
-  const addFeed = async (url: string): Promise<void> => {
+  async function addFeed(url: string) {
     try {
       const res = await fetch('/api/feeds', {
         method: 'POST',
@@ -50,7 +51,8 @@ export default function FeedsPage(): JSX.Element {
     }
   }
 
-  const deleteFeed = async (id: string): Promise<void> => {
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+  async function deleteFeed(id: string) {
     if (!confirm('Are you sure you want to delete this feed?')) return
     
     try {
@@ -97,14 +99,14 @@ export default function FeedsPage(): JSX.Element {
                 <p className="text-gray-500">No feeds added yet</p>
               ) : (
                 <ul className="space-y-6">
-                  {feeds.map((feed: Feed) => (
+                  {feeds.map((feed) => (
                     <li key={feed.id} className="flex justify-between items-start pb-6 border-b border-gray-100 last:border-0">
                       <div>
                         <h3 className="font-medium mb-1">{feed.title}</h3>
                         <p className="text-sm text-gray-500">{feed.url}</p>
                       </div>
                       <button
-                        onClick={() => void deleteFeed(feed.id)}
+                        onClick={() => deleteFeed(feed.id)}
                         className="text-sm text-gray-400 hover:text-red-600 transition-colors"
                       >
                         Delete
