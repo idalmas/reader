@@ -18,7 +18,6 @@ export default function ArticlePage() {
   const params = useParams()
   const [article, setArticle] = useState<ExtractedArticle | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -41,7 +40,6 @@ export default function ArticlePage() {
         setArticle(data)
       } catch (err) {
         console.error('Error fetching article:', err)
-        setError('Failed to load article')
       } finally {
         setLoading(false)
       }
@@ -67,10 +65,6 @@ export default function ArticlePage() {
             <div className="text-center py-12 text-gray-500">
               Loading article...
             </div>
-          ) : error ? (
-            <div className="text-center py-12 text-red-500">
-              {error}
-            </div>
           ) : article ? (
             <article className="mb-16">
               <h1 className="text-2xl font-medium mb-4 leading-snug">{article.title}</h1>
@@ -82,7 +76,11 @@ export default function ArticlePage() {
                 dangerouslySetInnerHTML={{ __html: article.content }}
               />
             </article>
-          ) : null}
+          ) : (
+            <div className="text-center py-12 text-red-500">
+              Failed to load article
+            </div>
+          )}
         </div>
       </div>
     </AppLayout>
