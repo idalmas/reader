@@ -24,7 +24,6 @@ export default function RSSReader() {
   const [feeds, setFeeds] = useState<Feed[]>([]);
   const [allItems, setAllItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchFeeds();
@@ -65,7 +64,6 @@ export default function RSSReader() {
       setAllItems(sortedItems);
     } catch (err) {
       console.error('Error fetching feeds:', err);
-      setError('Failed to fetch feeds');
     } finally {
       setLoading(false);
     }
