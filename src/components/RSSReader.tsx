@@ -90,7 +90,7 @@ export default function RSSReader() {
   return (
     <AppLayout>
       <div className="px-8">
-        <div className="max-w-3xl">
+        <div className="max-w-2xl">
           {allItems.map((item) => (
             <article key={item.guid} className="py-6 border-b border-gray-100">
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
