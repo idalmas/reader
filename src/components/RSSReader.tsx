@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import AppLayout from './AppLayout';
 
@@ -20,17 +20,34 @@ interface Feed {
   user_id: string;
 }
 
+interface FeedContent {
+  title?: string;
+  items: FeedItem[];
+}
+
 export default function RSSReader() {
   const [feeds, setFeeds] = useState<Feed[]>([]);
   const [allItems, setAllItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchFeeds();
-  }, []);
+  const fetchFeedContent = async (url: string): Promise<FeedContent> => {
+    const response = await fetch('/api/rss', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ feedUrl: url }),
+    });
 
-  const fetchFeeds = async () => {
+    if (!response.ok) {
+      throw new Error('Failed to fetch feed');
+    }
+
+    return response.json();
+  };
+
+  const fetchFeeds = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/feeds');
@@ -44,7 +61,7 @@ export default function RSSReader() {
         try {
           const feedContent = await fetchFeedContent(feed.url);
           if (feedContent?.items) {
-            const itemsWithFeedTitle = feedContent.items.map(item => ({
+            const itemsWithFeedTitle = feedContent.items.map((item: FeedItem) => ({
               ...item,
               feedTitle: feedContent.title || feed.title,
             }));
@@ -69,28 +86,16 @@ export default function RSSReader() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchFeedContent = async (url: string) => {
-    const response = await fetch('/api/rss', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ feedUrl: url }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch feed');
-    }
-
-    return response.json();
-  };
+  useEffect(() => {
+    fetchFeeds();
+  }, [fetchFeeds]);
 
   return (
     <AppLayout>
       <div className="px-8">
-        <div className="max-w-2xl">
+        <div className="max-w-[600px]">
           {allItems.map((item) => (
             <article key={item.guid} className="py-6 border-b border-gray-100">
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
