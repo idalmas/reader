@@ -16,31 +16,29 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         isCollapsed ? 'w-[4.5rem]' : 'w-44'
       }`}
     >
-      {/* Toggle button */}
-      <button
-        onClick={onToggle}
-        className="absolute right-2 top-8 text-black hover:text-gray-600 transition-colors"
-      >
-        {isCollapsed ? (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 19l-7-7 7-7" />
-          </svg>
-        ) : (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 5l7 7-7 7" />
-          </svg>
-        )}
-      </button>
-
       <div className={`flex flex-col h-full ${isCollapsed ? 'p-4' : 'p-6'}`}>
         <div className="space-y-12">
           {/* Header */}
-          <div>
+          <div className="relative">
             <div className={`flex items-center px-3 ${isCollapsed ? 'justify-center' : ''}`}>
               <svg className="w-6 h-6 min-w-6 min-h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v18M8 21h8M7 3h10M9 6h6M9 9h6M9 12h6M9 15h6M7 18h10M8 3v2M16 3v2M10 6v3M14 6v3M10 12v3M14 12v3" />
               </svg>
             </div>
+            <button
+              onClick={onToggle}
+              className="absolute right-2 top-8 text-gray-400 hover:text-gray-300"
+            >
+              {isCollapsed ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 19l-7-7 7-7" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 5l7 7-7 7" />
+                </svg>
+              )}
+            </button>
           </div>
 
           {/* Navigation */}

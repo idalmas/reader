@@ -93,7 +93,7 @@ export default function RSSReader() {
   return (
     <AppLayout>
       <div className="px-2">
-        <div className="max-w-[600px]">
+        <div className="max-w-[600px] pt-8">
           {allItems.map((item) => (
             <article key={item.guid} className="border-b border-gray-100">
               <Link 
