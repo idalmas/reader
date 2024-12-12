@@ -92,26 +92,23 @@ export default function RSSReader() {
 
   return (
     <AppLayout>
-      <div className="px-8">
+      <div className="px-2">
         <div className="max-w-[600px]">
           {allItems.map((item) => (
-            <article key={item.guid} className="py-6 border-b border-gray-100">
-              <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                <span>{item.feedTitle}</span>
-                <span>•</span>
-                <time>{new Date(item.pubDate).toLocaleDateString()}</time>
-              </div>
-              <h2 className="text-xl font-medium mb-1">
-                <Link 
-                  href={`/article/${encodeURIComponent(item.link)}`}
-                  className="hover:text-gray-600 transition-colors"
-                >
-                  {item.title}
-                </Link>
-              </h2>
-              {item.author && (
-                <p className="text-sm text-gray-500">By {item.author}</p>
-              )}
+            <article key={item.guid} className="border-b border-gray-100">
+              <Link 
+                href={`/article/${encodeURIComponent(item.link)}`}
+                className="block hover:bg-slate-200 transition-colors py-2 px-2"
+              >
+                <div className="flex flex-col">
+                  <h2 className="text-base font-normal">
+                    {item.title}
+                  </h2>
+                  {item.author && (
+                    <p className="text-sm text-gray-500 mt-0.5">{item.author}</p>
+                  )}
+                </div>
+              </Link>
             </article>
           ))}
 
