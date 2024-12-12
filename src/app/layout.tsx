@@ -25,7 +25,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={inter.className}>
-          <div className="fixed top-4 right-4 z-10">
+          <div className="fixed top-4 right-4">
             <SignedOut>
               <SignInButton mode="modal">
                 <button className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
@@ -37,23 +37,8 @@ export default function RootLayout({
               <UserButton afterSignOutUrl="/" />
             </SignedIn>
           </div>
-
-          <div className="text-center mt-20">
-            <h1>A simple RSS reader</h1>
-            <button className="get-started">Get Started</button>
-            <div className="hero-box"></div>
-          </div>
-          
           <main className="min-h-screen bg-gray-50">
             {children}
-            
-            <div className="hero-section">
-              <img 
-                src="/your-background-image.jpg" 
-                alt="Background" 
-                className="hero-image"
-              />
-            </div>
           </main>
         </body>
       </html>
