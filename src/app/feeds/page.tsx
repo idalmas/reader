@@ -52,7 +52,7 @@ export default function FeedsPage() {
     }
   }
 
-  const deleteFeed = async (id: number) => {
+  const deleteFeed = async (id: string) => {
     try {
       const response = await fetch(`/api/feeds?id=${id}`, {
         method: 'DELETE'
