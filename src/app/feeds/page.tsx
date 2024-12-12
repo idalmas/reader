@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { type Feed } from '@/types/database'
 import AppLayout from '@/components/AppLayout'
 
@@ -11,11 +11,7 @@ export default function FeedsPage() {
   const [newFeedUrl, setNewFeedUrl] = useState('')
   const [addingFeed, setAddingFeed] = useState(false)
 
-  useEffect(() => {
-    fetchFeeds()
-  }, [])
-
-  const fetchFeeds = async () => {
+  const fetchFeeds = useCallback(async () => {
     try {
       const response = await fetch('/api/feeds')
       if (!response.ok) throw new Error('Failed to fetch feeds')
@@ -27,7 +23,11 @@ export default function FeedsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchFeeds()
+  }, [fetchFeeds])
 
   const addFeed = async () => {
     try {
