@@ -44,6 +44,9 @@ export default function Home() {
 
         {/* Overlapping White Box */}
         <div className="relative -mt-64 sm:-mt-[400px]">
+          {/* Full-width white extension - moved outside the inner div */}
+          <div className="absolute bottom-0 left-0 right-0 w-full bg-white h-[200px]" />
+          
           <div className="bg-white shadow-xl mx-auto w-[700px] h-[650px] rounded-t-2xl relative">
             {/* Text on white box */}
             <div className="absolute inset-x-0 top-16 flex items-center justify-center">

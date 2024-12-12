@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 interface SidebarProps {
@@ -55,9 +56,13 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 }`}
                 title="Feed"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
+                <Image
+                  src="/custom-feed-icon.svg"
+                  width={20}
+                  height={20}
+                  alt="Feed"
+                  className="min-w-[20px]"
+                />
                 <span className={`ml-2 transition-opacity duration-300 ${
                   isCollapsed ? 'opacity-0 hidden' : 'opacity-100'
                 }`}>
@@ -73,15 +78,15 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     ? 'text-black font-medium bg-white' 
                     : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
                 }`}
-                title="Your List"
+                title="Manage Feeds"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
                 <span className={`ml-2 transition-opacity duration-300 ${
                   isCollapsed ? 'opacity-0 hidden' : 'opacity-100'
                 }`}>
-                  Your List
+                  Manage Feeds
                 </span>
               </Link>
             </div>
