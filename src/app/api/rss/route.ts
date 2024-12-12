@@ -2,12 +2,20 @@ import { NextResponse } from 'next/server';
 import Parser from 'rss-parser';
 
 // Define custom types for the RSS parser
+interface MediaContent {
+  $: {
+    url?: string;
+    type?: string;
+    medium?: string;
+  };
+}
+
 type CustomItem = {
   creator?: string;
   author?: string;
   content?: string;
   contentEncoded?: string;
-  media?: any;
+  media?: MediaContent;
   guid: string;
 };
 
