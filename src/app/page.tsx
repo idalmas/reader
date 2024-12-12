@@ -24,7 +24,12 @@ export default function Home() {
           <div className="absolute top-8 left-0 right-0 z-10 px-4">
             <div className="max-w-2xl mx-auto">
               <div className="bg-white rounded-lg h-12 flex items-center justify-between px-6">
-                <div className="text-lg font-medium tracking-tight">Osgiliath</div>
+                <div className="flex items-center">
+                  <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v18M8 21h8M7 3h10M9 6h6M9 9h6M9 12h6M9 15h6M7 18h10M8 3v2M16 3v2M10 6v3M14 6v3M10 12v3M14 12v3" />
+                  </svg>
+                  <span className="text-lg font-medium tracking-tight ml-2">Osgiliath</span>
+                </div>
                 <SignedOut>
                   <SignInButton mode="modal">
                     <button className="text-lg text-gray-600 hover:text-gray-900 transition-colors">
