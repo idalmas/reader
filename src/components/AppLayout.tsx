@@ -19,7 +19,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
       
       {/* Main content area */}
-      <div className={`flex-1 transition-all duration-300 ${isCollapsed ? 'pl-16' : 'pl-64'}`}>
+      <div className={`flex-1 transition-all duration-300 ${isCollapsed ? 'pl-16' : 'pl-48'}`}>
         {children}
       </div>
     </div>
