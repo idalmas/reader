@@ -29,7 +29,6 @@ export default function RSSReader() {
   const [feeds, setFeeds] = useState<Feed[]>([]);
   const [allItems, setAllItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const fetchFeedContent = async (url: string): Promise<FeedContent> => {
     const response = await fetch('/api/rss', {
@@ -82,7 +81,6 @@ export default function RSSReader() {
       setAllItems(sortedItems);
     } catch (err) {
       console.error('Error fetching feeds:', err);
-      setError('Failed to fetch feeds');
     } finally {
       setLoading(false);
     }
