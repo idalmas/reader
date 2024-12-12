@@ -1,13 +1,30 @@
 import { NextResponse } from 'next/server';
 import Parser from 'rss-parser';
 
-// Create a new parser instance
-const parser = new Parser({
+// Define custom types for the RSS parser
+type CustomItem = {
+  creator?: string;
+  author?: string;
+  content?: string;
+  contentEncoded?: string;
+  media?: any;
+  guid: string;
+};
+
+type CustomFeed = {
+  title: string;
+  description?: string;
+  link?: string;
+};
+
+// Create a new parser instance with custom types
+const parser: Parser<CustomFeed, CustomItem> = new Parser({
   defaultRSS: 2.0,
   customFields: {
     item: [
       ['media:content', 'media'],
       ['content:encoded', 'contentEncoded'],
+      ['dc:creator', 'creator'],
     ],
   },
 });
