@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AppLayout from './AppLayout';
 
@@ -20,38 +20,17 @@ interface Feed {
   user_id: string;
 }
 
-interface ParsedFeedItem {
-  title?: string;
-  link?: string;
-  content?: string;
-  pubDate?: string;
-  author?: string;
-  categories?: string[];
-  guid?: string;
-}
-
 export default function RSSReader() {
   const [feeds, setFeeds] = useState<Feed[]>([]);
   const [allItems, setAllItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchFeedContent = async (url: string) => {
-    const response = await fetch('/api/rss', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ feedUrl: url }),
-    });
+  useEffect(() => {
+    fetchFeeds();
+  }, []);
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch feed');
-    }
-
-    return response.json();
-  };
-
-  const fetchFeeds = useCallback(async () => {
+  const fetchFeeds = async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/feeds');
@@ -65,14 +44,8 @@ export default function RSSReader() {
         try {
           const feedContent = await fetchFeedContent(feed.url);
           if (feedContent?.items) {
-            const itemsWithFeedTitle = feedContent.items.map((item: ParsedFeedItem) => ({
-              title: item.title || 'Untitled',
-              link: item.link || '',
-              content: item.content || '',
-              pubDate: item.pubDate || new Date().toISOString(),
-              author: item.author,
-              categories: item.categories,
-              guid: item.guid || item.link || Math.random().toString(),
+            const itemsWithFeedTitle = feedContent.items.map(item => ({
+              ...item,
               feedTitle: feedContent.title || feed.title,
             }));
             allFeedItems.push(...itemsWithFeedTitle);
@@ -92,14 +65,27 @@ export default function RSSReader() {
       setAllItems(sortedItems);
     } catch (err) {
       console.error('Error fetching feeds:', err);
+      setError('Failed to fetch feeds');
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  useEffect(() => {
-    fetchFeeds();
-  }, [fetchFeeds]);
+  const fetchFeedContent = async (url: string) => {
+    const response = await fetch('/api/rss', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ feedUrl: url }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch feed');
+    }
+
+    return response.json();
+  };
 
   return (
     <AppLayout>

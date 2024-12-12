@@ -38,8 +38,8 @@ export default function ArticlePage() {
 
         const data = await response.json()
         setArticle(data)
-      } catch {
-        console.error('Failed to fetch article')
+      } catch (err) {
+        console.error('Error fetching article:', err)
       } finally {
         setLoading(false)
       }
