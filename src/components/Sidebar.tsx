@@ -12,8 +12,8 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
   return (
     <div 
-      className={`fixed left-0 top-0 bottom-0 bg-gray-50 transition-all duration-300 ${
-        isCollapsed ? 'w-16' : 'w-64'
+      className={`fixed left-0 top-0 bottom-0 bg-[#f1f4f2] transition-all duration-300 ${
+        isCollapsed ? 'w-16' : 'w-44'
       }`}
     >
       {/* Toggle button */}
@@ -32,7 +32,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         )}
       </button>
 
-      <div className={`flex flex-col h-full ${isCollapsed ? 'p-4' : 'p-8'}`}>
+      <div className={`flex flex-col h-full ${isCollapsed ? 'p-4' : 'p-6'}`}>
         <div className="space-y-12">
           {/* Header */}
           <div>
