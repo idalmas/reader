@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -9,12 +10,18 @@ interface SidebarProps {
 export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const isPath = (path: string) => pathname === path;
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  const handleToggle = () => {
+    if (!hasInteracted) setHasInteracted(true);
+    onToggle();
+  };
 
   return (
     <div 
-      className={`fixed left-0 top-0 bottom-0 bg-[#f1f4f2] transition-all duration-300 ${
+      className={`fixed left-0 top-0 bottom-0 bg-[#f1f4f2] ${
         isCollapsed ? 'w-[4.5rem]' : 'w-44'
-      }`}
+      } ${hasInteracted ? 'transition-all duration-300' : ''}`}
     >
       <div className={`flex flex-col h-full ${isCollapsed ? 'p-4' : 'p-6'}`}>
         <div className="space-y-12">
@@ -26,7 +33,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               </svg>
             </div>
             <button
-              onClick={onToggle}
+              onClick={handleToggle}
               className="absolute right-2 top-8 text-gray-400 hover:text-gray-300"
             >
               {isCollapsed ? (

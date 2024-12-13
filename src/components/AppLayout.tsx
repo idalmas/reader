@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { Inter } from 'next/font/google'
 import Sidebar from './Sidebar'
 
@@ -11,14 +11,13 @@ interface AppLayoutProps {
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem('sidebarCollapsed');
-    if (stored !== null) {
-      setIsCollapsed(JSON.parse(stored));
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('sidebarCollapsed') || 'false');
+    } catch {
+      return false;
     }
-  }, []);
+  });
 
   const toggleSidebar = () => {
     const newState = !isCollapsed;
@@ -32,7 +31,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <Sidebar isCollapsed={isCollapsed} onToggle={toggleSidebar} />
       
       {/* Main content area */}
-      <div className={`flex-1 transition-all duration-300 ${isCollapsed ? 'pl-[4.5rem]' : 'pl-48'}`}>
+      <div className={`flex-1 ${isCollapsed ? 'pl-[4.5rem]' : 'pl-48'}`}>
         {children}
       </div>
     </div>
