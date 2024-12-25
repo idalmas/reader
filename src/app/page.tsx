@@ -84,11 +84,15 @@ export default function Home() {
             </div>
 
             {/* Demo/Screenshot Box */}
-            <div className="mt-8 sm:-mt-12 w-full sm:w-[600px] h-[400px] bg-black/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-2xl">
-              {/* Placeholder text - remove when adding actual image */}
-              <div className="h-full flex items-center justify-center text-white/50 text-lg">
-                App Preview
-              </div>
+            <div className="mt-8 sm:-mt-12 w-full sm:w-[600px] h-[400px] bg-black/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-2xl overflow-hidden">
+              <Image
+                src="/app.png"
+                alt="Osgiliath RSS Reader Preview"
+                width={1200}
+                height={800}
+                className="w-full h-full object-cover"
+                priority
+              />
             </div>
           </div>
         </div>
