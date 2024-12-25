@@ -1,9 +1,10 @@
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
-import { Inter } from 'next/font/google';
+import { Inter, Playfair_Display } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
+const playfair = Playfair_Display({ subsets: ['latin'] });
 
 export default function Home() {
   return (
@@ -11,16 +12,18 @@ export default function Home() {
       {/* Hero Section */}
       <div className="relative isolate">
         {/* Full-width image container */}
-        <div className="h-[500px] sm:h-[800px] w-full relative">
+        <div className="w-screen relative bg-white overflow-hidden">
           <Image
             src="/landing.webp"
             alt="RSS Reader Landing Image"
-            fill
-            style={{ objectFit: 'cover' }}
+            width={2400}
+            height={1600}
+            className="w-full h-auto"
+            quality={100}
             priority
           />
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent from-40% via-white/50 via-70% to-white/95" />
           
           {/* Floating Header Bar */}
           <div className="absolute top-8 left-0 right-0 z-10 px-4">
@@ -49,19 +52,19 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Overlapping White Box */}
-        <div className="relative -mt-64 sm:-mt-[400px]">
-          <div className="bg-white shadow-xl mx-auto w-[700px] h-[650px] rounded-t-2xl relative">
-            {/* Text on white box */}
-            <div className="absolute inset-x-0 top-16 flex items-center justify-center">
-              <h1 className="text-4xl sm:text-6xl font-medium tracking-tight text-black">
-                A simple RSS reader
+        {/* Main Content */}
+        <div className="relative max-w-7xl mx-auto px-6 -mt-[450px] sm:-mt-[650px]">
+          <div className="relative flex flex-col sm:flex-row items-start justify-between">
+            {/* Text and Button Column */}
+            <div>
+              {/* Text */}
+              <h1 className={`text-5xl sm:text-7xl font-medium tracking-tight text-white mb-8 drop-shadow-lg ${playfair.className}`}>
+                A simple RSS<br />
+                <span className="mt-4 inline-block">reader</span>
               </h1>
-            </div>
 
-            {/* Buttons */}
-            <div className="absolute inset-x-0 top-48 flex items-center justify-center">
-              <div className="flex items-center justify-center gap-x-6">
+              {/* Buttons */}
+              <div className="flex items-center gap-x-6">
                 <SignedIn>
                   <Link
                     href="/dashboard"
@@ -77,6 +80,14 @@ export default function Home() {
                     </button>
                   </SignInButton>
                 </SignedOut>
+              </div>
+            </div>
+
+            {/* Demo/Screenshot Box */}
+            <div className="mt-8 sm:-mt-12 w-full sm:w-[600px] h-[400px] bg-black/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-2xl">
+              {/* Placeholder text - remove when adding actual image */}
+              <div className="h-full flex items-center justify-center text-white/50 text-lg">
+                App Preview
               </div>
             </div>
           </div>
