@@ -19,6 +19,8 @@ export default function Home() {
             style={{ objectFit: 'cover' }}
             priority
           />
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white" />
           
           {/* Floating Header Bar */}
           <div className="absolute top-8 left-0 right-0 z-10 px-4">
