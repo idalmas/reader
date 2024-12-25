@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useLayoutEffect } from 'react';
+import { useState } from 'react';
 import { Inter } from 'next/font/google'
 import Sidebar from './Sidebar'
 
