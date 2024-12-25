@@ -6,15 +6,13 @@ import {
   LayoutDashboard, 
   ListCollapse, 
   Settings, 
-  FileText,
-  ChevronDown
+  FileText
 } from 'lucide-react'
 
 import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
