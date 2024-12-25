@@ -13,11 +13,13 @@ interface AppLayoutProps {
 export default function AppLayout({ children }: AppLayoutProps) {
   return (
     <SidebarProvider>
-      <div className={`flex min-h-screen bg-background ${inter.className}`}>
+      <div className={`flex min-h-screen bg-white ${inter.className}`}>
         <AppSidebar />
-        <main className="flex-1 bg-background">
-          <SidebarTrigger />
-          {children}
+        <main className="flex-1 bg-white">
+          <SidebarTrigger className="m-4" />
+          <div className="bg-white">
+            {children}
+          </div>
         </main>
       </div>
     </SidebarProvider>
