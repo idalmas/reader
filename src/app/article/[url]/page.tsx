@@ -5,6 +5,14 @@ import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
 import AppLayout from '@/components/AppLayout'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
 
 interface ExtractedArticle {
   title: string;
@@ -40,6 +48,8 @@ export default function ArticlePage() {
   const [markingAsRead, setMarkingAsRead] = useState(false)
   const [selectedText, setSelectedText] = useState('')
   const [notes, setNotes] = useState<Note[]>([])
+  const [showNoteDialog, setShowNoteDialog] = useState(false)
+  const [noteContent, setNoteContent] = useState('')
 
   const itemId = searchParams.get('id')
   const currentView = searchParams.get('currentView') || 'unread'
@@ -50,13 +60,15 @@ export default function ArticlePage() {
         setLoading(true)
         const decodedUrl = decodeURIComponent(params.url as string)
         
-        // Try to get from cache first
-        const cachedData = getCachedArticle(decodedUrl);
-        if (cachedData) {
-          console.log('Using cached article');
-          setArticle(cachedData);
-          setLoading(false);
-          return;
+        // Only check cache on client side
+        if (typeof window !== 'undefined') {
+          const cachedData = getCachedArticle(decodedUrl);
+          if (cachedData) {
+            console.log('Using cached article');
+            setArticle(cachedData);
+            setLoading(false);
+            return;
+          }
         }
 
         const token = await getToken();
@@ -75,8 +87,10 @@ export default function ArticlePage() {
 
         const data = await response.json()
         setArticle(data)
-        // Cache the article
-        cacheArticle(decodedUrl, data);
+        // Only cache on client side
+        if (typeof window !== 'undefined') {
+          cacheArticle(decodedUrl, data);
+        }
       } catch (err) {
         console.error('Error fetching article:', err)
       } finally {
@@ -233,7 +247,7 @@ export default function ArticlePage() {
         },
         body: JSON.stringify({
           feed_item_id: itemId,
-          content: selectedText,
+          content: noteContent || selectedText,
           selected_text: selectedText
         }),
       });
@@ -245,6 +259,8 @@ export default function ArticlePage() {
       const newNote = await response.json();
       setNotes(prev => [newNote, ...prev]);
       setSelectedText('');
+      setNoteContent('');
+      setShowNoteDialog(false);
       
       // Clear the selection
       window.getSelection()?.removeAllRanges();
@@ -263,7 +279,8 @@ export default function ArticlePage() {
       }
       // 'n' key for creating a note from selection
       if (event.key === 'n' && selectedText) {
-        createNote();
+        setNoteContent(selectedText);
+        setShowNoteDialog(true);
       }
     };
 
@@ -275,8 +292,8 @@ export default function ArticlePage() {
 
   return (
     <AppLayout>
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="max-w-xl">
+      <div className="px-4 sm:px-6 lg:px-8 flex">
+        <div className="max-w-xl flex-1">
           <div className="mb-8 pt-8">
             <Link 
               href="/dashboard" 
@@ -300,42 +317,15 @@ export default function ArticlePage() {
                 className="prose prose-gray max-w-none prose-headings:font-medium prose-a:text-gray-900 prose-a:no-underline hover:prose-a:underline prose-p:text-base prose-headings:text-lg"
                 dangerouslySetInnerHTML={{ __html: article.content }}
               />
-              <div className="mt-8 flex flex-col gap-4">
-                <div className="flex justify-center">
-                  <button
-                    onClick={markAsRead}
-                    disabled={markingAsRead || !itemId}
-                    className="px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {markingAsRead ? 'Marking as Read...' : 'Mark as Read (r)'}
-                  </button>
-                </div>
-                {selectedText && (
-                  <div className="flex justify-center">
-                    <button
-                      onClick={createNote}
-                      className="px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
-                    >
-                      Create Note from Selection (n)
-                    </button>
-                  </div>
-                )}
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={markAsRead}
+                  disabled={markingAsRead || !itemId}
+                  className="px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {markingAsRead ? 'Marking as Read...' : 'Mark as Read (r)'}
+                </button>
               </div>
-              {notes.length > 0 && (
-                <div className="mt-8">
-                  <h2 className="text-lg font-medium mb-4">Notes</h2>
-                  <div className="space-y-4">
-                    {notes.map(note => (
-                      <div key={note.id} className="p-4 bg-gray-50 rounded-md">
-                        <p className="text-sm text-gray-900">{note.content}</p>
-                        <p className="text-xs text-gray-500 mt-2">
-                          {new Date(note.created_at).toLocaleString()}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </article>
           ) : (
             <div className="text-center py-12 text-red-500">
@@ -343,7 +333,73 @@ export default function ArticlePage() {
             </div>
           )}
         </div>
+
+        {/* Notes sidebar */}
+        <div className="w-80 pl-8 pt-8 hidden lg:block">
+          <div className="sticky top-8">
+            <h2 className="text-lg font-medium mb-4">Notes</h2>
+            {notes.length > 0 ? (
+              <div className="space-y-4">
+                {notes.map(note => (
+                  <div key={note.id} className="p-4 bg-gray-50 rounded-md">
+                    {note.selected_text && (
+                      <p className="text-sm text-gray-500 italic mb-2">"{note.selected_text}"</p>
+                    )}
+                    <p className="text-sm text-gray-900">{note.content}</p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      {new Date(note.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">
+                Select text and press 'n' to create a note
+              </p>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Note creation dialog */}
+      <Dialog open={showNoteDialog} onOpenChange={setShowNoteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Note</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            {selectedText && (
+              <div className="mb-4">
+                <label className="text-sm text-gray-500">Selected Text:</label>
+                <p className="text-sm mt-1 italic">"{selectedText}"</p>
+              </div>
+            )}
+            <div>
+              <label className="text-sm text-gray-500">Note:</label>
+              <Textarea
+                value={noteContent}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNoteContent(e.target.value)}
+                placeholder="Add your note here..."
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <button
+              onClick={() => setShowNoteDialog(false)}
+              className="px-4 py-2 text-sm text-gray-500 hover:text-gray-900"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={createNote}
+              className="px-4 py-2 bg-gray-900 text-white text-sm rounded-md hover:bg-gray-800"
+            >
+              Save Note
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   )
 } 

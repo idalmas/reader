@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { 
@@ -7,7 +8,6 @@ import {
   ListCollapse, 
   Settings, 
   FileText,
-  PanelLeftClose,
   PanelLeft,
   Book
 } from 'lucide-react'
@@ -32,7 +32,12 @@ import { cn } from "@/lib/utils"
 export function AppSidebar() {
   const pathname = usePathname()
   const isPath = (path: string) => pathname === path
-  const { state, toggleSidebar } = useSidebar()
+  const { toggleSidebar } = useSidebar()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const mainMenuItems = [
     {
@@ -65,8 +70,12 @@ export function AppSidebar() {
     },
   ]
 
+  if (!mounted) {
+    return null
+  }
+
   return (
-    <Sidebar collapsible="icon" className="border-r">
+    <Sidebar collapsible="icon" className="border-r" variant="sidebar">
       <SidebarHeader className="border-b border-border">
         <div className="flex flex-col items-center px-4 py-2 group-data-[collapsible=icon]:px-2">
           <Button
@@ -75,11 +84,7 @@ export function AppSidebar() {
             onClick={toggleSidebar}
             className="h-8 w-8"
           >
-            {state === "expanded" ? (
-              <PanelLeftClose className="h-4 w-4" />
-            ) : (
-              <PanelLeft className="h-4 w-4" />
-            )}
+            <PanelLeft className="h-4 w-4" />
             <span className="sr-only">Toggle Sidebar</span>
           </Button>
           <div className="flex items-center mt-2 group-data-[collapsible=icon]:hidden">
