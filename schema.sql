@@ -25,14 +25,27 @@ CREATE TABLE feed_items (
     UNIQUE(link, feed_id)
 );
 
+-- Create notes table
+CREATE TABLE notes (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    feed_item_id UUID REFERENCES feed_items(id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL,
+    content TEXT NOT NULL,
+    selected_text TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Create indexes for better query performance
 CREATE INDEX feed_items_feed_id_idx ON feed_items(feed_id);
 CREATE INDEX feed_items_status_idx ON feed_items(status);
 CREATE INDEX feeds_user_id_idx ON feeds(user_id);
+CREATE INDEX notes_feed_item_id_idx ON notes(feed_item_id);
+CREATE INDEX notes_user_id_idx ON notes(user_id);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE feeds ENABLE ROW LEVEL SECURITY;
 ALTER TABLE feed_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for feeds
 CREATE POLICY "Enable read access for own feeds"
@@ -62,4 +75,21 @@ CREATE POLICY "Enable update access for own feed items"
     ON feed_items FOR UPDATE
     USING (feed_id IN (
         SELECT id FROM feeds WHERE auth.jwt() ->> 'sub' = user_id
-    )); 
+    ));
+
+-- Create policies for notes
+CREATE POLICY "Enable read access for own notes"
+    ON notes FOR SELECT
+    USING (auth.jwt() ->> 'sub' = user_id);
+
+CREATE POLICY "Enable insert access for own notes"
+    ON notes FOR INSERT
+    WITH CHECK (auth.jwt() ->> 'sub' = user_id);
+
+CREATE POLICY "Enable update access for own notes"
+    ON notes FOR UPDATE
+    USING (auth.jwt() ->> 'sub' = user_id);
+
+CREATE POLICY "Enable delete access for own notes"
+    ON notes FOR DELETE
+    USING (auth.jwt() ->> 'sub' = user_id); 
