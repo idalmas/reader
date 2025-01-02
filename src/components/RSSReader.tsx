@@ -50,11 +50,54 @@ export default function RSSReader() {
   const [hasMore, setHasMore] = useState(true);
   const currentView = (searchParams.get('status') as FeedView) || 'unread';
 
+  // Cache management functions
+  function getCachedItems(view: FeedView): FeedItem[] | null {
+    try {
+      const cached = localStorage.getItem(`${CACHE_KEY}_${view}`);
+      if (!cached) return null;
+
+      const data: CacheData = JSON.parse(cached);
+      const now = Date.now();
+
+      // Check if cache is still valid
+      if (now - data.timestamp > CACHE_DURATION) {
+        localStorage.removeItem(`${CACHE_KEY}_${view}`);
+        return null;
+      }
+
+      return data.items;
+    } catch (err) {
+      console.error('Error reading feed cache:', err);
+      return null;
+    }
+  }
+
+  function cacheItems(view: FeedView, items: FeedItem[]) {
+    try {
+      const cacheData: CacheData = {
+        items,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem(`${CACHE_KEY}_${view}`, JSON.stringify(cacheData));
+    } catch (err) {
+      console.error('Error caching feed items:', err);
+    }
+  }
+
   // Initial feed fetch
   useEffect(() => {
     async function fetchFeeds() {
       try {
         setLoading(true);
+
+        // Try to get from cache first
+        const cachedItems = getCachedItems(currentView);
+        if (cachedItems) {
+          setAllItems(cachedItems);
+          setLoading(false);
+          return;
+        }
+
         const response = await fetch('/api/items?status=' + currentView);
         if (!response.ok) throw new Error('Failed to fetch feeds');
         const data = await response.json();
@@ -68,6 +111,9 @@ export default function RSSReader() {
 
         setAllItems(sortedItems);
         setHasMore(data.page < data.totalPages);
+        
+        // Cache the items
+        cacheItems(currentView, sortedItems);
       } catch (err) {
         console.error('Error fetching feeds:', err);
       } finally {
@@ -90,6 +136,22 @@ export default function RSSReader() {
   function loadMore() {
     setPage(prev => prev + 1);
   }
+
+  // Clear cache when marking as read
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === null) {
+        // Clear cache when storage is cleared
+        localStorage.removeItem(`${CACHE_KEY}_unread`);
+        localStorage.removeItem(`${CACHE_KEY}_read`);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   return (
     <AppLayout>
