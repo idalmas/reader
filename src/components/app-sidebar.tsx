@@ -68,15 +68,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="border-b border-border">
-        <div className="flex items-center justify-between px-4 py-2 group-data-[collapsible=icon]:px-2">
-          <div className="flex items-center">
-            <div className="flex items-center justify-center w-8 h-8">
-              <svg className="w-5 h-5 text-foreground/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v18M8 21h8M7 3h10M9 6h6M9 9h6M9 12h6M9 15h6M7 18h10M8 3v2M16 3v2M10 6v3M14 6v3M10 12v3M14 12v3" />
-              </svg>
-            </div>
-            <span className="ml-2 text-lg font-medium text-foreground group-data-[collapsible=icon]:hidden">Osgiliath</span>
-          </div>
+        <div className="flex flex-col items-center px-4 py-2 group-data-[collapsible=icon]:px-2">
           <Button
             variant="ghost"
             size="icon"
@@ -90,6 +82,14 @@ export function AppSidebar() {
             )}
             <span className="sr-only">Toggle Sidebar</span>
           </Button>
+          <div className="flex items-center mt-2 group-data-[collapsible=icon]:hidden">
+            <div className="flex items-center justify-center w-8 h-8">
+              <svg className="w-5 h-5 text-foreground/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v18M8 21h8M7 3h10M9 6h6M9 9h6M9 12h6M9 15h6M7 18h10M8 3v2M16 3v2M10 6v3M14 6v3M10 12v3M14 12v3" />
+              </svg>
+            </div>
+            <span className="ml-2 text-lg font-medium text-foreground">Osgiliath</span>
+          </div>
         </div>
       </SidebarHeader>
       <SidebarContent>
