@@ -3,14 +3,17 @@ import Link from 'next/link';
 import AppLayout from './AppLayout';
 
 interface FeedItem {
+  id: string;
   title: string;
   link: string;
   content: string;
   pubDate: string;
+  published_at?: string;
   author?: string;
   categories?: string[];
   guid: string;
   feedTitle?: string;
+  status: 'read' | 'unread' | 'archived';
 }
 
 interface Feed {
@@ -34,6 +37,8 @@ const ITEMS_PER_PAGE = 20;
 const CACHE_KEY = 'rss_feed_cache';
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
+type FeedView = 'unread' | 'read';
+
 export default function RSSReader() {
   const [feeds, setFeeds] = useState<Feed[]>([]);
   const [allItems, setAllItems] = useState<FeedItem[]>([]);
@@ -41,135 +46,37 @@ export default function RSSReader() {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-
-  // Cache management functions
-  const getCachedData = (): CacheData | null => {
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (!cached) return null;
-      
-      const data: CacheData = JSON.parse(cached);
-      const now = Date.now();
-      
-      // Check if cache is still valid
-      if (now - data.timestamp > CACHE_DURATION) {
-        localStorage.removeItem(CACHE_KEY);
-        return null;
-      }
-      
-      return data;
-    } catch (err) {
-      console.error('Error reading cache:', err);
-      return null;
-    }
-  };
-
-  const setCachedData = (items: FeedItem[]) => {
-    try {
-      const cacheData: CacheData = {
-        items,
-        timestamp: Date.now(),
-      };
-      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
-    } catch (err) {
-      console.error('Error setting cache:', err);
-    }
-  };
-
-  // Fetch feed content
-  async function fetchFeedContent(feed: Feed): Promise<FeedContent | null> {
-    try {
-      const response = await fetch('/api/rss', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ feedUrl: feed.url }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch feed');
-      }
-
-      return response.json();
-    } catch (err) {
-      console.error(`Error fetching feed ${feed.url}:`, err);
-      return null;
-    }
-  }
+  const [currentView, setCurrentView] = useState<FeedView>('unread');
 
   // Initial feed fetch
   useEffect(() => {
     async function fetchFeeds() {
       try {
         setLoading(true);
-
-        // Try to get cached data first
-        const cachedData = getCachedData();
-        if (cachedData) {
-          console.log('Using cached feed data');
-          setAllItems(cachedData.items);
-          setLoading(false);
-          
-          // Fetch fresh data in the background
-          fetchFreshData();
-          return;
-        }
-
-        await fetchFreshData();
-      } catch (err) {
-        console.error('Error fetching feeds:', err);
-        setLoading(false);
-      }
-    }
-
-    async function fetchFreshData() {
-      try {
-        const response = await fetch('/api/feeds');
+        const response = await fetch('/api/items?status=' + currentView);
         if (!response.ok) throw new Error('Failed to fetch feeds');
         const data = await response.json();
-        setFeeds(data);
         
-        // Fetch content for feeds in parallel batches
-        const batchSize = 3;
-        const newFeedItems: FeedItem[] = [];
-        
-        for (let i = 0; i < data.length; i += batchSize) {
-          const batch = data.slice(i, i + batchSize);
-          const feedPromises = batch.map(fetchFeedContent);
-          const feedResults = await Promise.all(feedPromises);
-          
-          feedResults.forEach((feedContent, index) => {
-            if (feedContent?.items) {
-              const itemsWithFeedTitle = feedContent.items.map((item: FeedItem) => ({
-                ...item,
-                feedTitle: feedContent.title || batch[index].title,
-              }));
-              newFeedItems.push(...itemsWithFeedTitle);
-            }
-          });
-        }
-
-        // Sort all items by date
-        const sortedItems = newFeedItems.sort((a, b) => {
-          const dateA = new Date(a.pubDate).getTime();
-          const dateB = new Date(b.pubDate).getTime();
+        // Sort items by date
+        const sortedItems = data.items.sort((a: FeedItem, b: FeedItem) => {
+          const dateA = new Date(a.published_at || '').getTime();
+          const dateB = new Date(b.published_at || '').getTime();
           return dateB - dateA;
         });
 
         setAllItems(sortedItems);
-        setCachedData(sortedItems);
+        setHasMore(data.page < data.totalPages);
       } catch (err) {
-        console.error('Error fetching fresh data:', err);
+        console.error('Error fetching feeds:', err);
       } finally {
         setLoading(false);
       }
     }
 
     fetchFeeds();
-  }, []); // Only run on mount
+  }, [currentView]); // Refetch when view changes
 
-  // Handle pagination separately
+  // Handle pagination
   useEffect(() => {
     const start = 0;
     const end = page * ITEMS_PER_PAGE;
@@ -186,10 +93,40 @@ export default function RSSReader() {
     <AppLayout>
       <div className="px-2">
         <div className="max-w-[600px] pt-8">
+          {/* View Toggle */}
+          <div className="mb-6 flex justify-center space-x-4">
+            <button
+              onClick={() => {
+                setCurrentView('unread');
+                setPage(1);
+              }}
+              className={`px-4 py-2 rounded-md transition-colors ${
+                currentView === 'unread'
+                  ? 'bg-gray-900 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              Unread
+            </button>
+            <button
+              onClick={() => {
+                setCurrentView('read');
+                setPage(1);
+              }}
+              className={`px-4 py-2 rounded-md transition-colors ${
+                currentView === 'read'
+                  ? 'bg-gray-900 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              Done
+            </button>
+          </div>
+
           {displayedItems.map((item) => (
-            <article key={item.guid} className="border-b border-gray-100">
+            <article key={item.id} className="border-b border-gray-100">
               <Link 
-                href={`/article/${encodeURIComponent(item.link)}`}
+                href={`/article/${encodeURIComponent(item.link)}?id=${item.id}&currentView=${currentView}`}
                 className="block hover:bg-slate-200 transition-colors py-2 px-2"
               >
                 <div className="flex flex-col">
@@ -211,7 +148,11 @@ export default function RSSReader() {
 
           {!loading && displayedItems.length === 0 && (
             <div className="text-center py-12 text-gray-500">
-              {feeds.length === 0 ? 'Add some feeds to get started' : 'No articles found'}
+              {feeds.length === 0 
+                ? 'Add some feeds to get started' 
+                : currentView === 'unread'
+                  ? 'No unread articles'
+                  : 'No read articles'}
             </div>
           )}
 

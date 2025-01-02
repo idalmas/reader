@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useAuth } from '@clerk/nextjs'
 import AppLayout from '@/components/AppLayout'
 
 interface ExtractedArticle {
@@ -24,8 +25,15 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 export default function ArticlePage() {
   const params = useParams()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const { getToken } = useAuth()
   const [article, setArticle] = useState<ExtractedArticle | null>(null)
   const [loading, setLoading] = useState(true)
+  const [markingAsRead, setMarkingAsRead] = useState(false)
+
+  const itemId = searchParams.get('id')
+  const currentView = searchParams.get('currentView') || 'unread'
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -42,10 +50,12 @@ export default function ArticlePage() {
           return;
         }
 
+        const token = await getToken();
         const response = await fetch('/api/extract', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({ url: decodedUrl }),
         })
@@ -66,7 +76,7 @@ export default function ArticlePage() {
     }
 
     fetchArticle()
-  }, [params.url])
+  }, [params.url, getToken])
 
   // Cache management functions
   function getCachedArticle(url: string): ExtractedArticle | null {
@@ -102,6 +112,81 @@ export default function ArticlePage() {
     }
   }
 
+  const markAsRead = async () => {
+    if (!itemId || markingAsRead) return;
+    
+    try {
+      setMarkingAsRead(true);
+      console.log('Marking article as read:', itemId);
+      
+      const token = await getToken();
+      const response = await fetch('/api/items', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          id: itemId,
+          status: 'read'
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Server response:', response.status, errorData);
+        throw new Error(`Failed to mark article as read: ${response.status} ${errorData}`);
+      }
+
+      const result = await response.json();
+      console.log('Successfully marked as read:', result);
+
+      // Get next unread article
+      console.log('Fetching next article...');
+      const nextArticleResponse = await fetch(`/api/items/next?currentId=${itemId}&status=unread`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!nextArticleResponse.ok) {
+        const errorData = await nextArticleResponse.text();
+        console.error('Next article response:', nextArticleResponse.status, errorData);
+        throw new Error(`Failed to fetch next article: ${nextArticleResponse.status} ${errorData}`);
+      }
+
+      const nextArticle = await nextArticleResponse.json();
+      console.log('Next article:', nextArticle);
+
+      if (nextArticle && nextArticle.link) {
+        router.push(`/article/${encodeURIComponent(nextArticle.link)}?id=${nextArticle.id}&currentView=unread`);
+      } else {
+        // If no next article, go back to feed
+        router.push('/dashboard');
+      }
+    } catch (err) {
+      console.error('Error marking article as read:', err);
+      alert('Failed to mark article as read. Please try again.');
+    } finally {
+      setMarkingAsRead(false);
+    }
+  };
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // 'm' key for marking as read
+      if (event.key === 'm' && !markingAsRead) {
+        markAsRead();
+      }
+    };
+
+    window.addEventListener('keypress', handleKeyPress);
+    return () => {
+      window.removeEventListener('keypress', handleKeyPress);
+    };
+  }, [markingAsRead]);
+
   return (
     <AppLayout>
       <div className="px-4 sm:px-6 lg:px-8">
@@ -129,6 +214,15 @@ export default function ArticlePage() {
                 className="prose prose-gray max-w-none prose-headings:font-medium prose-a:text-gray-900 prose-a:no-underline hover:prose-a:underline prose-p:text-base prose-headings:text-lg"
                 dangerouslySetInnerHTML={{ __html: article.content }}
               />
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={markAsRead}
+                  disabled={markingAsRead || !itemId}
+                  className="px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {markingAsRead ? 'Marking as Read...' : 'Mark as Read (m)'}
+                </button>
+              </div>
             </article>
           ) : (
             <div className="text-center py-12 text-red-500">
