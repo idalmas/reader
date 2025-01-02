@@ -219,6 +219,9 @@ export default function ArticlePage() {
   // Handle text selection
   useEffect(() => {
     const handleSelection = () => {
+      // Don't update selection if note dialog is open
+      if (showNoteDialog) return;
+
       const selection = window.getSelection();
       if (selection && selection.toString().trim()) {
         setSelectedText(selection.toString().trim());
@@ -232,7 +235,7 @@ export default function ArticlePage() {
       document.removeEventListener('mouseup', handleSelection);
       document.removeEventListener('keyup', handleSelection);
     };
-  }, []);
+  }, [showNoteDialog]);
 
   const createNote = async () => {
     if (!itemId || !selectedText) return;
@@ -273,13 +276,18 @@ export default function ArticlePage() {
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
+      // Ignore shortcuts if we're typing in a textarea or input
+      if (event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLInputElement) {
+        return;
+      }
+
       // 'r' key for marking as read
       if (event.key === 'r' && !markingAsRead) {
         markAsRead();
       }
       // 'n' key for creating a note from selection
       if (event.key === 'n' && selectedText) {
-        setNoteContent(selectedText);
+        setNoteContent('');
         setShowNoteDialog(true);
       }
     };
@@ -288,7 +296,7 @@ export default function ArticlePage() {
     return () => {
       window.removeEventListener('keypress', handleKeyPress);
     };
-  }, [markingAsRead, selectedText]);
+  }, [markingAsRead, selectedText, markAsRead]);
 
   return (
     <AppLayout>
