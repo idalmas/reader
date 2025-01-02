@@ -8,7 +8,8 @@ import {
   Settings, 
   FileText,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  Book
 } from 'lucide-react'
 import { UserButton } from "@clerk/nextjs"
 
@@ -43,6 +44,11 @@ export function AppSidebar() {
       title: "Your List",
       url: "/feeds",
       icon: ListCollapse,
+    },
+    {
+      title: "Read",
+      url: "/dashboard?status=read",
+      icon: Book,
     },
   ]
 

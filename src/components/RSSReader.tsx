@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import AppLayout from './AppLayout';
 
 interface FeedItem {
@@ -40,13 +41,14 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 type FeedView = 'unread' | 'read';
 
 export default function RSSReader() {
+  const searchParams = useSearchParams();
   const [feeds, setFeeds] = useState<Feed[]>([]);
   const [allItems, setAllItems] = useState<FeedItem[]>([]);
   const [displayedItems, setDisplayedItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [currentView, setCurrentView] = useState<FeedView>('unread');
+  const currentView = (searchParams.get('status') as FeedView) || 'unread';
 
   // Initial feed fetch
   useEffect(() => {
@@ -93,36 +95,6 @@ export default function RSSReader() {
     <AppLayout>
       <div className="px-2">
         <div className="max-w-[600px] pt-8">
-          {/* View Toggle */}
-          <div className="mb-6 flex justify-center space-x-4">
-            <button
-              onClick={() => {
-                setCurrentView('unread');
-                setPage(1);
-              }}
-              className={`px-4 py-2 rounded-md transition-colors ${
-                currentView === 'unread'
-                  ? 'bg-gray-900 text-white'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              Unread
-            </button>
-            <button
-              onClick={() => {
-                setCurrentView('read');
-                setPage(1);
-              }}
-              className={`px-4 py-2 rounded-md transition-colors ${
-                currentView === 'read'
-                  ? 'bg-gray-900 text-white'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              Done
-            </button>
-          </div>
-
           {displayedItems.map((item) => (
             <article key={item.id} className="border-b border-gray-100">
               <Link 
