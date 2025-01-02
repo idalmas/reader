@@ -3,7 +3,6 @@ import {
   SignInButton,
   SignedIn,
   SignedOut,
-  UserButton
 } from '@clerk/nextjs'
 import './globals.css'
 import type { Metadata } from 'next'
@@ -33,9 +32,6 @@ export default function RootLayout({
                 </button>
               </SignInButton>
             </SignedOut>
-            <SignedIn>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
           </div>
           <main>
             {children}
