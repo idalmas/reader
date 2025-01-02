@@ -14,6 +14,14 @@ interface ExtractedArticle {
   length: number;
 }
 
+interface ArticleCache {
+  article: ExtractedArticle;
+  timestamp: number;
+}
+
+const ARTICLE_CACHE_PREFIX = 'article_cache_';
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
 export default function ArticlePage() {
   const params = useParams()
   const [article, setArticle] = useState<ExtractedArticle | null>(null)
@@ -24,6 +32,16 @@ export default function ArticlePage() {
       try {
         setLoading(true)
         const decodedUrl = decodeURIComponent(params.url as string)
+        
+        // Try to get from cache first
+        const cachedData = getCachedArticle(decodedUrl);
+        if (cachedData) {
+          console.log('Using cached article');
+          setArticle(cachedData);
+          setLoading(false);
+          return;
+        }
+
         const response = await fetch('/api/extract', {
           method: 'POST',
           headers: {
@@ -38,6 +56,8 @@ export default function ArticlePage() {
 
         const data = await response.json()
         setArticle(data)
+        // Cache the article
+        cacheArticle(decodedUrl, data);
       } catch (err) {
         console.error('Error fetching article:', err)
       } finally {
@@ -47,6 +67,40 @@ export default function ArticlePage() {
 
     fetchArticle()
   }, [params.url])
+
+  // Cache management functions
+  function getCachedArticle(url: string): ExtractedArticle | null {
+    try {
+      const cached = localStorage.getItem(ARTICLE_CACHE_PREFIX + url);
+      if (!cached) return null;
+
+      const data: ArticleCache = JSON.parse(cached);
+      const now = Date.now();
+
+      // Check if cache is still valid
+      if (now - data.timestamp > CACHE_DURATION) {
+        localStorage.removeItem(ARTICLE_CACHE_PREFIX + url);
+        return null;
+      }
+
+      return data.article;
+    } catch (err) {
+      console.error('Error reading article cache:', err);
+      return null;
+    }
+  }
+
+  function cacheArticle(url: string, articleData: ExtractedArticle) {
+    try {
+      const cacheData: ArticleCache = {
+        article: articleData,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem(ARTICLE_CACHE_PREFIX + url, JSON.stringify(cacheData));
+    } catch (err) {
+      console.error('Error caching article:', err);
+    }
+  }
 
   return (
     <AppLayout>
