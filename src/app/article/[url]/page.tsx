@@ -50,6 +50,7 @@ export default function ArticlePage() {
   const [notes, setNotes] = useState<Note[]>([])
   const [showNoteDialog, setShowNoteDialog] = useState(false)
   const [noteContent, setNoteContent] = useState('')
+  const [isSelecting, setIsSelecting] = useState(false)
 
   const itemId = searchParams.get('id')
   const currentView = searchParams.get('currentView') || 'unread'
@@ -218,22 +219,38 @@ export default function ArticlePage() {
 
   // Handle text selection
   useEffect(() => {
-    const handleSelection = () => {
-      // Don't update selection if note dialog is open
+    const handleMouseup = () => {
       if (showNoteDialog) return;
 
       const selection = window.getSelection();
-      if (selection && selection.toString().trim()) {
-        setSelectedText(selection.toString().trim());
+      if (!selection || selection.rangeCount === 0) return;
+
+      const range = selection.getRangeAt(0);
+      const articleContent = document.querySelector('.prose');
+      if (!articleContent) return;
+
+      // Check if the selection intersects with the article content
+      const articleRect = articleContent.getBoundingClientRect();
+      const selectionRect = range.getBoundingClientRect();
+
+      // If the selection doesn't overlap with the article, ignore it
+      if (selectionRect.bottom < articleRect.top || 
+          selectionRect.top > articleRect.bottom ||
+          selectionRect.right < articleRect.left || 
+          selectionRect.left > articleRect.right) {
+        return;
+      }
+
+      const selectedStr = selection.toString().trim();
+      if (selectedStr) {
+        setSelectedText(selectedStr);
       }
     };
 
-    document.addEventListener('mouseup', handleSelection);
-    document.addEventListener('keyup', handleSelection);
+    document.addEventListener('mouseup', handleMouseup);
     
     return () => {
-      document.removeEventListener('mouseup', handleSelection);
-      document.removeEventListener('keyup', handleSelection);
+      document.removeEventListener('mouseup', handleMouseup);
     };
   }, [showNoteDialog]);
 
@@ -261,15 +278,21 @@ export default function ArticlePage() {
       
       const newNote = await response.json();
       setNotes(prev => [newNote, ...prev]);
-      setSelectedText('');
       setNoteContent('');
       setShowNoteDialog(false);
-      
-      // Clear the selection
-      window.getSelection()?.removeAllRanges();
+      // Keep the selection active
     } catch (err) {
       console.error('Error creating note:', err);
       alert('Failed to create note. Please try again.');
+    }
+  };
+
+  // Add dialog close handler
+  const handleDialogChange = (open: boolean) => {
+    setShowNoteDialog(open);
+    if (!open) {
+      setNoteContent('');
+      // Don't clear selectedText when closing dialog
     }
   };
 
@@ -370,7 +393,7 @@ export default function ArticlePage() {
       </div>
 
       {/* Note creation dialog */}
-      <Dialog open={showNoteDialog} onOpenChange={setShowNoteDialog}>
+      <Dialog open={showNoteDialog} onOpenChange={handleDialogChange}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create Note</DialogTitle>
