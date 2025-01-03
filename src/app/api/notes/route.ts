@@ -6,7 +6,7 @@ import type { ApiError } from '@/types/database'
 // POST /api/notes - Create a new note
 export async function POST(request: NextRequest) {
   try {
-    const userId = await getAuthenticatedUserId(request)
+    const userId = await getAuthenticatedUserId()
     const { feed_item_id, content, selected_text } = await request.json()
 
     if (!feed_item_id || !content) {
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 // GET /api/notes - Get notes for a feed item
 export async function GET(request: NextRequest) {
   try {
-    const userId = await getAuthenticatedUserId(request)
+    const userId = await getAuthenticatedUserId()
     const { searchParams } = new URL(request.url)
     const feed_item_id = searchParams.get('feed_item_id')
 

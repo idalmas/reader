@@ -6,7 +6,7 @@ import { type ItemStatus, type ApiError } from '@/types/database'
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = await getAuthenticatedUserId(request)
+    const userId = await getAuthenticatedUserId()
     
     const { searchParams } = new URL(request.url)
     const currentId = searchParams.get('currentId')

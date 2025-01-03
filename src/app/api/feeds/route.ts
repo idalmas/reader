@@ -15,7 +15,7 @@ const parser = new Parser({
 // GET /api/feeds - List user's feeds
 export async function GET(request: NextRequest) {
   try {
-    const userId = await getAuthenticatedUserId(request)
+    const userId = await getAuthenticatedUserId()
     
     const { data: feeds, error } = await supabase
       .from('feeds')
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 // POST /api/feeds - Add a new feed
 export async function POST(request: NextRequest) {
   try {
-    const userId = await getAuthenticatedUserId(request)
+    const userId = await getAuthenticatedUserId()
     const { url } = await request.json()
     
     // Fetch the feed content
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
 // DELETE /api/feeds - Delete a feed
 export async function DELETE(request: NextRequest) {
   try {
-    const userId = await getAuthenticatedUserId(request)
+    const userId = await getAuthenticatedUserId()
     const { searchParams } = new URL(request.url)
     const feedId = searchParams.get('id')
     

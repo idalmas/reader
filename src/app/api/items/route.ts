@@ -7,7 +7,7 @@ import { type ItemStatus, type ApiError, type FeedItemWithFeed } from '@/types/d
 // GET /api/items - List feed items
 export async function GET(request: NextRequest) {
   try {
-    const userId = await getAuthenticatedUserId(request)
+    const userId = await getAuthenticatedUserId()
     
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') as ItemStatus || 'unread'
