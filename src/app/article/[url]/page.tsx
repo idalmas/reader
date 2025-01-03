@@ -13,7 +13,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { v4 as uuidv4 } from 'uuid';
 
 interface ExtractedArticle {
   title: string;
@@ -52,7 +51,6 @@ export default function ArticlePage() {
   const [showNoteDialog, setShowNoteDialog] = useState(false)
   const [noteContent, setNoteContent] = useState('')
   const [isSelecting, setIsSelecting] = useState(false)
-  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   const itemId = searchParams.get('id')
   const currentView = searchParams.get('currentView') || 'unread'
@@ -221,7 +219,7 @@ export default function ArticlePage() {
 
   // Handle text selection
   useEffect(() => {
-    const handleMouseUp = () => {
+    const handleMouseup = () => {
       if (showNoteDialog) return;
 
       const selection = window.getSelection();
@@ -231,30 +229,28 @@ export default function ArticlePage() {
       const articleContent = document.querySelector('.prose');
       if (!articleContent) return;
 
-      // Check if the selection is within the article content
-      const startIsValid = articleContent.contains(range.startContainer) &&
-                          (range.startContainer.nodeType === Node.TEXT_NODE ||
-                           (range.startContainer instanceof Element && 
-                            range.startContainer.closest('p, h1, h2, h3, h4, h5, h6')));
-      
-      const endIsValid = articleContent.contains(range.endContainer) &&
-                        (range.endContainer.nodeType === Node.TEXT_NODE ||
-                         (range.endContainer instanceof Element && 
-                          range.endContainer.closest('p, h1, h2, h3, h4, h5, h6')));
+      // Check if the selection intersects with the article content
+      const articleRect = articleContent.getBoundingClientRect();
+      const selectionRect = range.getBoundingClientRect();
 
-      // Only update our state if it's a valid selection
-      if (startIsValid && endIsValid) {
-        const selectedStr = selection.toString().trim();
-        if (selectedStr) {
-          setSelectedText(selectedStr);
-        }
+      // If the selection doesn't overlap with the article, ignore it
+      if (selectionRect.bottom < articleRect.top || 
+          selectionRect.top > articleRect.bottom ||
+          selectionRect.right < articleRect.left || 
+          selectionRect.left > articleRect.right) {
+        return;
+      }
+
+      const selectedStr = selection.toString().trim();
+      if (selectedStr) {
+        setSelectedText(selectedStr);
       }
     };
 
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mouseup', handleMouseup);
     
     return () => {
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mouseup', handleMouseup);
     };
   }, [showNoteDialog]);
 
@@ -284,16 +280,7 @@ export default function ArticlePage() {
       setNotes(prev => [newNote, ...prev]);
       setNoteContent('');
       setShowNoteDialog(false);
-      
-      // Remove the highlight after creating the note
-      if (highlightId) {
-        const highlight = document.getElementById(highlightId);
-        if (highlight) {
-          highlight.outerHTML = highlight.innerHTML;
-        }
-        setHighlightId(null);
-      }
-      setSelectedText('');
+      // Keep the selection active
     } catch (err) {
       console.error('Error creating note:', err);
       alert('Failed to create note. Please try again.');
