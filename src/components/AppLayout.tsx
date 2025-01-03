@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, useState, useEffect } from 'react'
 import { Inter } from 'next/font/google'
 import { AppSidebar } from './app-sidebar'
 import { SidebarProvider } from "@/components/ui/sidebar"
@@ -13,14 +13,15 @@ interface AppLayoutProps {
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
-  const [open, setOpen] = useState(() => {
-    // Try to read initial state from localStorage during initialization
-    if (typeof window !== 'undefined') {
-      const savedState = localStorage.getItem(SIDEBAR_STATE_KEY)
-      return savedState === null ? true : savedState === 'true'
+  const [open, setOpen] = useState(true);
+
+  // Initialize from localStorage after mount
+  useEffect(() => {
+    const savedState = localStorage.getItem(SIDEBAR_STATE_KEY)
+    if (savedState !== null) {
+      setOpen(savedState === 'true')
     }
-    return true
-  })
+  }, []);
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen)

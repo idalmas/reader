@@ -227,15 +227,15 @@ export default function ArticlePage() {
       const articleContent = document.querySelector('.prose');
       if (!articleContent) return;
 
-      // Check if the selection intersects with the article content
-      const articleRect = articleContent.getBoundingClientRect();
-      const selectionRect = range.getBoundingClientRect();
+      // Check if the selection is contained within the article content
+      let container: Node | null = range.commonAncestorContainer;
+      while (container && container !== articleContent) {
+        container = container.parentNode;
+      }
 
-      // If the selection doesn't overlap with the article, ignore it
-      if (selectionRect.bottom < articleRect.top || 
-          selectionRect.top > articleRect.bottom ||
-          selectionRect.right < articleRect.left || 
-          selectionRect.left > articleRect.right) {
+      // If we didn't find the article content in the ancestor chain, the selection is outside
+      if (!container) {
+        setSelectedText('');
         return;
       }
 
