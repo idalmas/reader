@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { NextRequest } from 'next/server'
 import { getAuthenticatedUserId } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
-import { type ItemStatus, type ApiError, type FeedItemWithFeed } from '@/types/database'
+import { type ItemStatus, type ApiError } from '@/types/database'
 
 export async function GET(request: NextRequest) {
   try {
