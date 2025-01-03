@@ -1,7 +1,7 @@
 'use client'
 
+import { type ReactNode, useState } from 'react'
 import { Inter } from 'next/font/google'
-import { useEffect, useState } from 'react'
 import { AppSidebar } from './app-sidebar'
 import { SidebarProvider } from "@/components/ui/sidebar"
 
@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'] })
 const SIDEBAR_STATE_KEY = 'sidebar:state'
 
 interface AppLayoutProps {
-  children: React.ReactNode;
+  children: ReactNode
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {

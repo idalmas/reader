@@ -17,11 +17,9 @@ interface FeedItem {
   created_at: string;
   status: 'unread' | 'read';
   feed: Feed;
-}
-
-interface FeedContent {
-  title?: string;
-  items: FeedItem[];
+  published_at?: string;
+  feedTitle?: string;
+  author?: string;
 }
 
 interface CacheData {
@@ -37,7 +35,6 @@ type FeedView = 'unread' | 'read';
 
 export default function RSSReader() {
   const searchParams = useSearchParams();
-  const [feeds, setFeeds] = useState<Feed[]>([]);
   const [allItems, setAllItems] = useState<FeedItem[]>([]);
   const [displayedItems, setDisplayedItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -177,7 +174,7 @@ export default function RSSReader() {
 
           {!loading && displayedItems.length === 0 && (
             <div className="text-center py-12 text-gray-500">
-              {feeds.length === 0 
+              {allItems.length === 0 
                 ? 'Add some feeds to get started' 
                 : currentView === 'unread'
                   ? 'No unread articles'

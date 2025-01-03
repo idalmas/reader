@@ -372,7 +372,7 @@ export default function ArticlePage() {
                 {notes.map(note => (
                   <div key={note.id} className="p-4 bg-gray-50 rounded-md">
                     {note.selected_text && (
-                      <p className="text-sm text-gray-500 italic mb-2">"{note.selected_text}"</p>
+                      <p className="text-sm text-gray-500 italic mb-2">&quot;{note.selected_text}&quot;</p>
                     )}
                     <p className="text-sm text-gray-900">{note.content}</p>
                     <p className="text-xs text-gray-500 mt-2">
