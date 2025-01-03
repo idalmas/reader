@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
@@ -50,10 +50,8 @@ export default function ArticlePage() {
   const [notes, setNotes] = useState<Note[]>([])
   const [showNoteDialog, setShowNoteDialog] = useState(false)
   const [noteContent, setNoteContent] = useState('')
-  const [isSelecting, setIsSelecting] = useState(false)
 
   const itemId = searchParams.get('id')
-  const currentView = searchParams.get('currentView') || 'unread'
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -136,7 +134,7 @@ export default function ArticlePage() {
     }
   }
 
-  const markAsRead = async () => {
+  const markAsRead = useCallback(async () => {
     if (!itemId || markingAsRead) return;
     
     try {
@@ -188,7 +186,7 @@ export default function ArticlePage() {
     } finally {
       setMarkingAsRead(false);
     }
-  };
+  }, [itemId, markingAsRead, getToken, router]);
 
   // Fetch notes for the current article
   useEffect(() => {
@@ -385,7 +383,7 @@ export default function ArticlePage() {
               </div>
             ) : (
               <p className="text-sm text-gray-500">
-                Select text and press 'n' to create a note
+                Select text and press &apos;n&apos; to create a note
               </p>
             )}
           </div>
@@ -402,7 +400,7 @@ export default function ArticlePage() {
             {selectedText && (
               <div className="mb-4">
                 <label className="text-sm text-gray-500">Selected Text:</label>
-                <p className="text-sm mt-1 italic">"{selectedText}"</p>
+                <p className="text-sm mt-1 italic">&quot;{selectedText}&quot;</p>
               </div>
             )}
             <div>

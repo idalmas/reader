@@ -3,25 +3,20 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import AppLayout from './AppLayout';
 
+interface Feed {
+  id: string;
+  title: string;
+  link: string;
+  created_at: string;
+}
+
 interface FeedItem {
   id: string;
   title: string;
   link: string;
-  content: string;
-  pubDate: string;
-  published_at?: string;
-  author?: string;
-  categories?: string[];
-  guid: string;
-  feedTitle?: string;
-  status: 'read' | 'unread' | 'archived';
-}
-
-interface Feed {
-  id: string;
-  title: string;
-  url: string;
-  user_id: string;
+  created_at: string;
+  status: 'unread' | 'read';
+  feed: Feed;
 }
 
 interface FeedContent {

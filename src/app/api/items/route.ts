@@ -42,29 +42,25 @@ export async function GET(request: NextRequest) {
 }
 
 // PATCH /api/items - Update item status
-export async function PATCH(request: NextRequest) {
+export async function PATCH(req: Request) {
   try {
-    const userId = await getAuthenticatedUserId(request)
-    const { id, status } = await request.json()
+    const { id, status } = await req.json();
     
-    // Update the item status - we're using service role so we trust the auth check
+    const supabase = createClient();
+    
     const { error } = await supabase
       .from('feed_items')
       .update({ status })
-      .eq('id', id)
-    
-    if (error) {
-      console.error('Update error:', error)
-      throw error
-    }
-    
-    return NextResponse.json({ success: true })
-  } catch (error: unknown) {
-    const apiError = error as ApiError
-    console.error('Item update error:', apiError)
-    if (apiError.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return NextResponse.json({ error: 'Failed to update item' }, { status: 500 })
+      .eq('id', id);
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error updating item:', error);
+    return NextResponse.json(
+      { error: 'Failed to update item' },
+      { status: 500 }
+    );
   }
 } 
