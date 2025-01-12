@@ -15,29 +15,24 @@ const parser = new Parser({
 // GET /api/feeds - List user's feeds
 export async function GET(request: NextRequest) {
   try {
-    let userId: string;
-    try {
-      userId = await getAuthenticatedUserId();
-    } catch (authError) {
-      console.error('Authentication error:', authError);
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+    const userId = await getAuthenticatedUserId()
+    
     const { data: feeds, error } = await supabase
       .from('feeds')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
     
-    if (error) {
-      console.error('Supabase error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    if (error) throw error
     
-    return NextResponse.json(feeds || []);
+    return NextResponse.json(feeds)
   } catch (error: unknown) {
-    console.error('Feed fetch error:', error);
-    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
+    const apiError = error as ApiError
+    console.error('Feed fetch error:', apiError)
+    if (apiError.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    return NextResponse.json({ error: 'Failed to fetch feeds' }, { status: 500 })
   }
 }
 
